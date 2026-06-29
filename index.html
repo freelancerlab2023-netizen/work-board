@@ -230,7 +230,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
         <div class="stat"><div class="stat-n" id="dActBookings">0건</div><div class="stat-l">섭외 (확정·완료)</div></div>
         <div class="stat"><div class="stat-n" id="dActFee">0원</div><div class="stat-l">섭외 단가 합</div></div>
         <div class="stat"><div class="stat-n" id="dActContent">0건</div><div class="stat-l">콘텐츠 작업</div></div>
-        <div class="stat"><div class="stat-n" id="dActDeriv">0%</div><div class="stat-l">채널 파생 완료율</div></div>
+        <div class="stat"><div class="stat-n" id="dActDeriv">0건</div><div class="stat-l">이번 달 업로드</div></div>
       </div>
     </div>
     <div class="card" id="osmuCard" style="display:none;cursor:pointer" onclick="go('content')">
@@ -285,14 +285,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
       <div id="clientList"></div>
     </div>
     <div class="card">
-      <div class="card-h">다음 단계 — 캠페인 발송 트래커 <span class="hint" style="margin:0">예정 · 구조 미리보기</span></div>
-      <div class="campaign-prev">
-        <span class="cp-pill">캠페인</span>
-        <div style="font-size:11px;color:#555;line-height:1.7">명분 있는 접점을 캠페인 단위로 만들고, 거래처별 발송을 체크합니다.<br>
-        예: <b>2026 설 인사</b> / <b>포트폴리오 업데이트</b> / <b>하반기 일정 오픈</b><br>
-        → 거래처 옆 체크박스로 "발송 완료" 기록 → 누가 남았는지 한눈에.</div>
-        <div class="hint">이 레이어를 확정하면 본격 구현합니다. 지금은 자리만 잡아둔 상태입니다.</div>
-      </div>
+      <div class="card-h"><span>연락 캠페인</span><button class="btn dark sm" onclick="openCampaignEdit()">+ 새 캠페인</button></div>
+      <div class="hint" style="margin-bottom:9px">명분 있는 접점(시즌 인사·프로필 업데이트·일정 오픈)을 만들고, 거래처별 발송을 체크하세요.</div>
+      <div id="campaignList"></div>
     </div>
   </section>
 
@@ -392,6 +387,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
 var CFG = {
   labUrl: 'https://www.youtube.com/',
   cafeUrl: '',  // 프리랜서연구소 카페 (세무·법률 상담) 링크 — 받는 대로 여기에 입력
+  campaignTemplates: [
+    { 유형:'시즌 인사', 이름:'설 인사', 문구:'[담당자명]님, 권세란입니다.\n풍요로운 설 명절 보내시길 바랍니다. 지난 [거래처명]과의 인연에 깊이 감사드리며, 올 한 해도 좋은 자리에서 함께할 수 있기를 기대합니다.\n새해 복 많이 받으세요.' },
+    { 유형:'시즌 인사', 이름:'추석 인사', 문구:'[담당자명]님, 권세란입니다.\n넉넉하고 따뜻한 한가위 보내시길 바랍니다. 늘 변함없이 챙겨 주셔서 감사드리며, 다가오는 행사에서도 좋은 호흡으로 함께하겠습니다.' },
+    { 유형:'시즌 인사', 이름:'연말 인사', 문구:'[담당자명]님, 권세란입니다.\n한 해 동안 보내 주신 신뢰에 진심으로 감사드립니다. 내년에도 무대 위에서 [거래처명]의 가치를 가장 정확하게 전하는 진행으로 보답하겠습니다. 따뜻한 연말 보내세요.' },
+    { 유형:'프로필 업데이트', 이름:'포트폴리오 공유', 문구:'[담당자명]님, 권세란입니다.\n최근 진행 영상과 포트폴리오를 새로 정리해 공유드립니다. 행사 성격에 맞는 진행이 필요하실 때 편하게 떠올려 주시면 감사하겠습니다.\n[포트폴리오 링크]' },
+    { 유형:'일정 오픈', 이름:'하반기 일정 오픈', 문구:'[담당자명]님, 권세란입니다.\n하반기 진행 일정을 오픈했습니다. 선호 날짜가 있으시면 미리 말씀해 주시면 우선 배정해 드리겠습니다. 좋은 자리로 다시 뵙기를 기대합니다.' },
+    { 유형:'상품·클래스', 이름:'신규 클래스 오픈', 문구:'[담당자명]님, 권세란입니다.\n스피치·커뮤니케이션 관련 새 프로그램을 오픈했습니다. 사내 교육이나 임직원 대상 강의가 필요하실 때 도움이 될 내용이라 먼저 안내드립니다.\n[상세 링크]' }
+  ],
   bugTo:  '0728ran@naver.com',
   defaultChannels: ['유튜브','인스타그램 (일상)','인스타그램 (브랜딩)','인스타그램 (포트폴리오)','블로그','링크드인'],
   allChannels: ['유튜브','인스타그램 (일상)','인스타그램 (브랜딩)','인스타그램 (포트폴리오)','블로그','링크드인','틱톡','팟캐스트','트위터/X','기타'],
@@ -411,7 +414,7 @@ function isSettled(b){ var v=b&&b['정산']; return v===true||v==='TRUE'||v===1|
 var PRI = {high:'높음',mid:'보통',low:'낮음'}, PRIO = {high:0,mid:1,low:2};
 
 /* ===================== 상태 ===================== */
-var S = { settings:{}, bookings:[], content:[], income:[], sales:[] };
+var S = { settings:{}, bookings:[], content:[], income:[], sales:[], campaigns:[] };
 var apiUrl = lsGet('wb_api') || '';
 var routine = lsGet('wb_routine', true) || { checks:{}, memo:{}, tasks:{} };
 if(!routine.tasks) routine.tasks={};
@@ -439,7 +442,7 @@ function loadAll(manual){
   hideBanner(); setSync('busy','동기화 중…');
   apiGet().then(function(res){
     if(!res.ok) throw new Error(res.error||'읽기 실패');
-    S.settings=res.settings||{}; S.bookings=res.bookings||[]; S.content=res.content||[]; S.income=res.income||[]; S.sales=res.sales||[];
+    S.settings=res.settings||{}; S.bookings=res.bookings||[]; S.content=res.content||[]; S.income=res.income||[]; S.sales=res.sales||[]; S.campaigns=res.campaigns||[];
     lsSet('wb_cache',S); applySettings(S.settings); renderAll(); setSync('ok','연결됨');
     if(manual) toast('새로고침 완료');
   }).catch(function(e){
@@ -448,15 +451,15 @@ function loadAll(manual){
   });
 }
 var saving=false;
-function write(action, data, okMsg){
+function write(action, data, okMsg, keepOpen){
   if(!apiUrl){ toast('먼저 Sheets를 연결하세요 (설정 탭)'); go('settings'); return; }
   if(saving){ toast('처리 중입니다…'); return; }
   saving=true; setSync('busy','저장 중…');
   apiPost(action,data).then(function(res){
     if(!res.ok) throw new Error(res.error||'저장 실패');
-    if(okMsg) toast(okMsg); closeModal(); return apiGet();
+    if(okMsg) toast(okMsg); if(!keepOpen) closeModal(); return apiGet();
   }).then(function(res){
-    if(res&&res.ok){ S.settings=res.settings;S.bookings=res.bookings;S.content=res.content;S.income=res.income;S.sales=res.sales; lsSet('wb_cache',S); applySettings(S.settings); renderAll(); }
+    if(res&&res.ok){ S.settings=res.settings;S.bookings=res.bookings;S.content=res.content;S.income=res.income;S.sales=res.sales;S.campaigns=res.campaigns||[]; lsSet('wb_cache',S); applySettings(S.settings); renderAll(); }
     setSync('ok','연결됨'); saving=false;
   }).catch(function(e){ setSync('err','오류'); toast('저장 실패: '+e.message); saving=false; });
 }
@@ -490,7 +493,7 @@ function incTotal(m){ return INCOME_CATS.reduce(function(a,c){return a+catValue(
 function lastMonths(n){ var out=[],d=new Date(); for(var i=n-1;i>=0;i--){ var x=new Date(d.getFullYear(),d.getMonth()-i,1); out.push(x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)); } return out; }
 
 /* ===================== 렌더 ===================== */
-function renderAll(){ renderSchedule(); renderDash(); renderDaily(); renderBookings(); renderClients(); renderContent(); renderIncomeMonths(); renderUnsettled(); renderSales(); }
+function renderAll(){ renderSchedule(); renderDash(); renderDaily(); renderBookings(); renderClients(); renderCampaigns(); renderContent(); renderIncomeMonths(); renderUnsettled(); renderSales(); }
 function renderSchedule(){
   var DOW=['일','월','화','수','목','금','토'];
   var base=new Date(); base.setHours(0,0,0,0);
@@ -505,9 +508,15 @@ function renderSchedule(){
     });
     var seen={};
     S.content.forEach(function(c){
-      var hit = dstr(c['작업일'])===key;
-      var der=c['채널파생']||{}; Object.keys(der).forEach(function(n){ if(der[n]&&dstr(der[n].date)===key) hit=true; });
-      if(hit && !seen[c.id]){ seen[c.id]=1; items+='<div class="witem ct">'+esc(c['제목']||'콘텐츠')+'</div>'; }
+      var s=c['일정']||{};
+      STAGES.forEach(function(st){
+        if(s[st] && dstr(s[st])===key){
+          var lbl = (st==='업로드') ? esc(c['제목']||'콘텐츠') : '['+st+'] '+esc(c['제목']||'콘텐츠');
+          items+='<div class="witem ct">'+lbl+'</div>';
+        }
+      });
+      // 구버전(채널파생) 호환
+      var der=c['채널파생']||{}; Object.keys(der).forEach(function(n){ if(der[n]&&dstr(der[n].date)===key && !seen[c.id]){ seen[c.id]=1; items+='<div class="witem ct">'+esc(c['제목']||'콘텐츠')+'</div>'; } });
     });
     html+='<div class="wday'+(isToday?' today':'')+(dow===0||dow===6?' weekend':'')+'">'+
       '<div class="wd-top"><span class="wd-dow">'+DOW[dow]+'</span>'+(isToday?'<span class="wd-today-tag">오늘</span>':'')+'</div>'+
@@ -541,11 +550,10 @@ function renderDash(){
   var bk=S.bookings.filter(function(b){return ym(b['날짜'])===m && (b['상태']==='확정'||b['상태']==='완료');});
   document.getElementById('dActBookings').textContent=bk.length+'건';
   document.getElementById('dActFee').textContent=won(bk.reduce(function(a,b){return a+(Number(b['단가'])||0);},0));
-  var cs=S.content.filter(function(c){return ym(c['작업일'])===m;});
+  var cs=S.content.filter(function(c){return ym(schedKeyDate(c))===m;});
   document.getElementById('dActContent').textContent=cs.length+'건';
-  var chN=channels().length, denom=cs.length*chN, doneN=0;
-  cs.forEach(function(c){ var d=c['채널파생']||{}; channels().forEach(function(n){ if(d[n]&&d[n].done)doneN++; }); });
-  document.getElementById('dActDeriv').textContent=(denom?Math.round(doneN/denom*100):0)+'%';
+  var ups=S.content.filter(function(c){ var s=c['일정']||{}; return s['업로드'] && ym(s['업로드'])===m; }).length;
+  document.getElementById('dActDeriv').textContent=ups+'건';
   // OSMU 미전환
   var unC=untransferred().length, oc=document.getElementById('osmuCard');
   if(unC){ oc.style.display='block'; document.getElementById('osmuCount').textContent=unC+'건'; } else oc.style.display='none';
@@ -736,7 +744,70 @@ function renderClients(){
   }).join('');
 }
 
-/* --- 콘텐츠 (섭외 OSMU 연동) --- */
+/* --- 연락 캠페인 --- */
+function renderCampaigns(){
+  var el=document.getElementById('campaignList'); if(!el) return;
+  if(!S.campaigns.length){ el.innerHTML='<div class="empty" style="padding:14px">아직 캠페인이 없습니다.<br>+ 새 캠페인으로 시작하세요.</div>'; return; }
+  var total=clientsAgg().length;
+  el.innerHTML=S.campaigns.slice().sort(function(a,b){return (b['생성일']||'').localeCompare(a['생성일']||'');}).map(function(c){
+    var rec=c['발송기록']||{}, sent=Object.keys(rec).length;
+    return '<div class="row"><div class="row-main" onclick="openCampaignSend(\''+c.id+'\')" style="cursor:pointer">'+
+      '<div class="row-t">'+esc(c['이름']||'(제목)')+'<span class="tag violet">'+esc(c['유형']||'')+'</span></div>'+
+      '<div class="row-s">발송 '+sent+'/'+total+' 거래처 · '+esc(dstr(c['생성일']))+'</div></div>'+
+      '<button class="icon-x" onclick="event.stopPropagation();delCampaign(\''+c.id+'\')">×</button></div>';
+  }).join('');
+}
+function openCampaignEdit(id){
+  var c= id? S.campaigns.find(function(x){return String(x.id)===String(id);}) : {};
+  var tplOpts='<option value="">— 예시 문구 불러오기 —</option>'+CFG.campaignTemplates.map(function(t,i){return '<option value="'+i+'">'+esc(t.유형+' · '+t.이름)+'</option>';}).join('');
+  modal('캠페인 '+(id?'수정':'만들기'),
+    '<input type="hidden" id="cmp_id" value="'+(c.id||'')+'">'+
+    (id?'':field('예시 문구 (구독 템플릿)','<select id="cmp_tpl" onchange="applyTemplate()">'+tplOpts+'</select>'))+
+    field('캠페인 이름','<input id="cmp_name" value="'+esc(c['이름']||'')+'" placeholder="예: 2026 설 인사">')+
+    field('유형','<input id="cmp_type" value="'+esc(c['유형']||'')+'" placeholder="시즌 인사 / 프로필 업데이트 …">')+
+    field('문구','<textarea id="cmp_msg" class="memo" style="min-height:140px">'+esc(c['문구']||'')+'</textarea>')+
+    '<div class="hint">[담당자명]·[거래처명]·[링크]는 거래처별로 복사 후 바꿔 쓰세요.</div>',
+    function(){ saveCampaign(); }
+  );
+}
+function applyTemplate(){
+  var i=val('cmp_tpl'); if(i==='') return; var t=CFG.campaignTemplates[+i]; if(!t) return;
+  if(!val('cmp_name')) document.getElementById('cmp_name').value=t.이름;
+  document.getElementById('cmp_type').value=t.유형;
+  document.getElementById('cmp_msg').value=t.문구;
+}
+function saveCampaign(){
+  var d={ id:val('cmp_id'),'이름':val('cmp_name'),'유형':val('cmp_type'),'문구':val('cmp_msg') };
+  if(!d['이름']){ toast('캠페인 이름을 입력하세요'); return; }
+  write('campaign.save', d, '저장됨');
+}
+function delCampaign(id){ if(confirm('이 캠페인을 삭제할까요?')) write('campaign.delete',{id:id},'삭제됨'); }
+function copyText(elId){
+  var t=document.getElementById(elId); if(!t) return;
+  navigator.clipboard? navigator.clipboard.writeText(t.value||t.textContent).then(function(){toast('문구 복사됨');},function(){toast('복사 실패 — 길게 눌러 복사하세요');}) : toast('길게 눌러 복사하세요');
+}
+function openCampaignSend(id){
+  var c=S.campaigns.find(function(x){return String(x.id)===String(id);}); if(!c) return;
+  var rec=c['발송기록']||{}; var clients=clientsAgg();
+  var list= clients.length? clients.map(function(cl){
+    var on=!!rec[cl.org];
+    var when= on? ' <span class="hint" style="margin:0">'+esc(dstr(rec[cl.org]))+'</span>':'';
+    var contact=(cl['전화']?'<a class="cl-ic" href="tel:'+esc(cl['전화'])+'" onclick="event.stopPropagation()">☎</a>':'')+(cl['이메일']?'<a class="cl-ic" href="mailto:'+esc(cl['이메일'])+'" onclick="event.stopPropagation()">✉</a>':'');
+    return '<div class="chrow"><div class="cbox'+(on?' on':'')+'" onclick="this.classList.toggle(\'on\');toggleCampaignSend(\''+id+'\',\''+esc(cl.org).replace(/'/g,"\\'")+'\',this.classList.contains(\'on\'))"></div>'+
+      '<div style="flex:1;min-width:0">'+esc(cl.org)+when+'</div><div class="cl-act">'+contact+'</div></div>';
+  }).join('') : '<div class="empty" style="padding:12px">거래처가 없습니다. 섭외를 먼저 기록하세요.</div>';
+  modal(esc(c['이름']||'캠페인'),
+    field('문구','<textarea id="cmp_view" class="memo" style="min-height:120px" readonly>'+esc(c['문구']||'')+'</textarea>')+
+    '<div class="btn-row" style="margin-top:8px"><button class="btn ghost sm" onclick="copyText(\'cmp_view\')">문구 복사</button><button class="btn ghost sm" onclick="openCampaignEdit(\''+id+'\')">문구 수정</button></div>'+
+    '<label style="margin-top:14px">거래처 발송 체크</label>'+list,
+    null
+  );
+}
+function toggleCampaignSend(id, client, sent){
+  var c=S.campaigns.find(function(x){return String(x.id)===String(id);});
+  if(c){ c['발송기록']=c['발송기록']||{}; if(sent) c['발송기록'][client]=today(); else delete c['발송기록'][client]; }
+  write('campaign.send', {id:id, client:client, sent:sent}, null, true);
+}
 function bookingLabel(b){ return esc((b['행사명']||'(행사명)')+(b['거래처']?' · '+b['거래처']:'')+(b['날짜']?' · '+dstr(b['날짜']):'')); }
 function contentForBooking(bid){ return S.content.find(function(c){return String(c['섭외id'])===String(bid);}); }
 function untransferred(){ return S.bookings.filter(function(b){ return !contentForBooking(b.id); })
@@ -761,60 +832,75 @@ function renderContent(){
   // 콘텐츠 목록
   var el=document.getElementById('contentList');
   if(!S.content.length){ el.innerHTML='<div class="empty">섭외에서 콘텐츠를 만들거나<br>자체 소스를 추가해 보세요.</div>'; return; }
-  var rows=S.content.slice().sort(function(a,b){return (b['작업일']||'').localeCompare(a['작업일']||'');});
+  var rows=S.content.slice().sort(function(a,b){ return (schedKeyDate(b)||'').localeCompare(schedKeyDate(a)||''); });
   el.innerHTML=rows.map(function(c){
-    var der=c['채널파생']||{}, ch=channels(), done=ch.filter(function(n){return der[n]&&der[n].done;}).length;
     var src; if(c['섭외id']){ var b=S.bookings.find(function(x){return String(x.id)===String(c['섭외id']);}); src='<span class="tag green">'+esc(b?b['행사명']:'섭외')+'</span>'; }
     else src='<span class="tag gray">자체</span>';
     return '<div class="row"><div class="row-main" onclick="openContent(\''+c.id+'\')" style="cursor:pointer">'+
       '<div class="row-t">'+esc(c['제목']||'(제목 없음)')+src+'</div>'+
-      '<div class="row-s">'+esc(c['소스유형']||'')+' · 파생 '+done+'/'+ch.length+' · '+esc(c['상태']||'')+'</div></div>'+
+      '<div class="row-s">'+esc(c['소스유형']||'')+' · '+esc(schedSummary(c))+' · '+esc(c['상태']||'')+'</div></div>'+
       '<button class="icon-x" onclick="delContent(\''+c.id+'\')">×</button></div>';
   }).join('');
+}
+function schedKeyDate(c){ var s=c['일정']||{}; return s['업로드']||s['편집마감']||s['촬영']||s['기획']||c['작업일']||''; }
+function schedSummary(c){
+  var s=c['일정']||{};
+  if(s['업로드']) return '업로드 '+dstr(s['업로드']);
+  // 다음 임박 단계
+  var t=today(), order=['기획','촬영','편집마감','업로드'], next=null;
+  order.forEach(function(st){ if(s[st] && !next && dstr(s[st])>=t) next=st; });
+  if(next) return next+' '+dstr(s[next]);
+  var any=order.filter(function(st){return s[st];}); if(any.length) return any[any.length-1]+' '+dstr(s[any[any.length-1]]);
+  return '일정 미정';
 }
 function openContentFromBooking(bid){
   var b=S.bookings.find(function(x){return String(x.id)===String(bid);}); if(!b) return;
   go('content');
   openContent(null, { '섭외id':bid, '제목':(b['행사명']||''), '소스유형':'강연·행사' });
 }
-function srcTypeForChannel(n){ if(/유튜브/.test(n))return '유튜브 영상'; if(/인스타/.test(n))return '인스타 릴스'; if(/블로그/.test(n))return '블로그 글'; return '기타'; }
+function srcTypeForChannel(n){ if(/유튜브/.test(n))return '유튜브 영상'; if(/인스타/.test(n))return '인스타 (사진/글)'; if(/블로그/.test(n))return '블로그 글'; return '기타'; }
 function openContentForChannel(n){
-  var der={}; der[n]={done:false,date:today()};
-  openContent(null, { '소스유형':srcTypeForChannel(n), '채널파생':der });
+  openContent(null, { '소스유형':srcTypeForChannel(n) });
 }
 function openContent(id, prefill){
   prefill=prefill||{};
   var c= id? S.content.find(function(x){return String(x.id)===String(id);}) : {'채널파생':(prefill['채널파생']||{})};
   var curSrc = id? (c['섭외id']||'') : (prefill['섭외id']||'');
-  var der=c['채널파생']||{};
-  var srcTypes=['유튜브 영상','인스타 릴스','블로그 글','강연·행사','기타'];
-  var preType=id?c['소스유형']:prefill['소스유형'];
+  var sched = id? (c['일정']||{}) : (prefill['일정']||{});
+  var srcTypes=['유튜브 영상','인스타 릴스(숏폼)','인스타 (사진/글)','블로그 글','강연·행사','기타'];
+  var preType=(id?c['소스유형']:prefill['소스유형'])||'유튜브 영상';
   var srcOpts=srcTypes.map(function(t){return '<option '+(preType===t?'selected':'')+'>'+esc(t)+'</option>';}).join('');
   // 출처(섭외 연결) 옵션
   var bkOpts='<option value="">자체 제작</option>'+S.bookings.slice().sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');})
     .map(function(b){return '<option value="'+b.id+'" '+(String(curSrc)===String(b.id)?'selected':'')+'>'+bookingLabel(b)+'</option>';}).join('');
-  var chRows=channels().map(function(n){ var d=der[n]||{},on=d.done;
-    return '<div class="chrow"><div class="cbox'+(on?' on':'')+'" data-ch="'+esc(n)+'" onclick="this.classList.toggle(\'on\')"></div>'+
-      '<div style="flex:1;min-width:0">'+esc(n)+'</div><div class="chd"><input type="date" data-chd="'+esc(n)+'" value="'+(d.date||'')+'"></div></div>';
-  }).join('');
   modal('콘텐츠 '+(id?'수정':'추가'),
     '<input type="hidden" id="c_id" value="'+(c.id||'')+'">'+
     field('출처 (섭외 연결)','<select id="c_booking">'+bkOpts+'</select>')+
     field('제목','<input id="c_title" value="'+esc(id?(c['제목']||''):(prefill['제목']||''))+'">')+
-    '<div class="fg2">'+field('소스 유형','<select id="c_src">'+srcOpts+'</select>')+field('작업일','<input id="c_date" type="date" value="'+(dstr(c['작업일'])||today())+'">')+'</div>'+
+    field('소스 유형','<select id="c_src" onchange="onContentSrcChange()">'+srcOpts+'</select>')+
     field('기획 링크','<input id="c_link" value="'+esc(c['기획링크']||'')+'">')+
     field('상태','<select id="c_status"><option>작업전</option><option>작업중</option><option>완료</option></select>')+
-    '<label>채널 파생 (체크=완료)</label>'+chRows,
+    '<div id="schedFields">'+scheduleFieldsHTML(preType, sched)+'</div>',
     function(){ saveContent(); }
   );
-  channels().forEach(function(n){ var d=der[n]||{}; if(d.done){ var box=document.querySelector('.cbox[data-ch="'+esc(n)+'"]'); if(box)box.classList.add('on'); } });
   if(id&&c['상태']) document.getElementById('c_status').value=c['상태'];
 }
+var STAGES=['기획','촬영','편집마감','업로드'];
+function isVideoSrc(t){ return /유튜브|영상|숏폼|릴스/.test(t||''); }
+function scheduleFieldsHTML(type, sched){
+  sched=sched||{};
+  if(isVideoSrc(type)){
+    return '<label>제작 일정 (영상)</label>'+STAGES.map(function(s){
+      return '<div class="chrow"><div style="flex:1;min-width:0">'+s+'</div><div class="chd"><input type="date" class="schd" data-stage="'+s+'" value="'+(sched[s]||'')+'"></div></div>';
+    }).join('')+'<div class="hint">각 단계 날짜가 주간 스케줄에 표시됩니다.</div>';
+  }
+  return '<label>업로드일</label><div class="chrow"><div style="flex:1;min-width:0">업로드</div><div class="chd"><input type="date" class="schd" data-stage="업로드" value="'+(sched['업로드']||'')+'"></div></div>';
+}
+function _curSched(){ var o={}; document.querySelectorAll('.schd').forEach(function(i){ if(i.value) o[i.getAttribute('data-stage')]=i.value; }); return o; }
+function onContentSrcChange(){ document.getElementById('schedFields').innerHTML=scheduleFieldsHTML(val('c_src'), _curSched()); }
 function saveContent(){
-  var der={};
-  document.querySelectorAll('.cbox[data-ch]').forEach(function(box){ var n=box.getAttribute('data-ch');
-    var di=document.querySelector('input[data-chd="'+n+'"]'); der[n]={done:box.classList.contains('on'),date:di?di.value:''}; });
-  var d={ id:val('c_id'),'제목':val('c_title'),'소스유형':val('c_src'),'작업일':val('c_date'),'기획링크':val('c_link'),'상태':val('c_status'),'섭외id':val('c_booking'),'채널파생':der };
+  var sched=_curSched();
+  var d={ id:val('c_id'),'제목':val('c_title'),'소스유형':val('c_src'),'작업일':(sched['업로드']||sched['기획']||today()),'기획링크':val('c_link'),'상태':val('c_status'),'섭외id':val('c_booking'),'일정':sched };
   if(!d['제목']){ toast('제목을 입력하세요'); return; }
   write('content.save', d, '저장됨');
 }
@@ -911,7 +997,7 @@ function testConnection(){
     catch(e){ throw new Error(/accounts\.google|로그인|sign in/i.test(txt)? '배포 액세스 권한을 "모든 사용자"로 설정하세요.' : '응답 형식 오류. 배포 상태를 확인하세요.'); }
     if(!res.ok) throw new Error(res.error||'연결 오류');
     setSync('ok','연결됨'); toast('연결되었습니다');
-    S.settings=res.settings||{}; S.bookings=res.bookings||[]; S.content=res.content||[]; S.income=res.income||[]; S.sales=res.sales||[];
+    S.settings=res.settings||{}; S.bookings=res.bookings||[]; S.content=res.content||[]; S.income=res.income||[]; S.sales=res.sales||[]; S.campaigns=res.campaigns||[];
     lsSet('wb_cache',S); hideBanner(); applySettings(S.settings); renderAll();
     setTimeout(function(){ go('dash'); },500);
   }).catch(function(e){
@@ -944,8 +1030,11 @@ function go(sec){
 document.querySelectorAll('.nb').forEach(function(b){ b.onclick=function(){ go(b.getAttribute('data-sec')); }; });
 var _modalCb=null;
 function modal(title,body,onSave){ _modalCb=onSave;
+  var btns = onSave
+    ? '<button class="btn dark sm" onclick="modalSave()">저장</button><button class="btn ghost sm" onclick="closeModal()">취소</button>'
+    : '<button class="btn dark sm" onclick="closeModal()">닫기</button>';
   document.getElementById('modal').innerHTML='<div class="modal-h">'+title+'</div>'+body+
-    '<div class="btn-row"><button class="btn dark sm" onclick="modalSave()">저장</button><button class="btn ghost sm" onclick="closeModal()">취소</button></div>';
+    '<div class="btn-row">'+btns+'</div>';
   document.getElementById('modalBg').classList.add('show'); }
 function modalSave(){ if(_modalCb)_modalCb(); }
 function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
