@@ -195,7 +195,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
   <div class="head">
     <div>
       <div class="brand" id="brand">워크보드</div>
-      <div class="by">by <span id="byname">권세란</span> · <a href="#" id="labLink">프리랜서연구소</a></div>
+      <div class="by" id="byline"></div>
     </div>
     <div class="sync"><span id="spinner">↻</span><span class="dot" id="syncDot"></span><span id="syncTxt">대기 중</span></div>
   </div>
@@ -364,7 +364,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
     </div>
   </section>
 
-  <div class="foot">프리랜서 방송인 워크보드 <span id="ver">v2</span> · by 권세란 · 프리랜서연구소<br>오늘 할 일은 이 기기에 저장됩니다.</div>
+  <div class="foot">프리랜서 방송인 워크보드 <span id="ver">v2</span> · <span id="footBy">프리랜서연구소</span><br>오늘 할 일은 이 기기에 저장됩니다.</div>
 </div>
 
 <div id="toast"></div>
@@ -456,12 +456,16 @@ window.addEventListener('beforeunload', function(e){ if(saving){ e.preventDefaul
 function channels(){ return (S.settings.channels&&S.settings.channels.length)? S.settings.channels : CFG.defaultChannels; }
 function eventTypes(){ return (S.settings.event_types&&S.settings.event_types.length)? S.settings.event_types : CFG.defaultEvents; }
 function applySettings(st){
-  var name=st.user_name||'권세란';
+  var BRAND='프리랜서연구소';
+  var name=st.user_name||BRAND;
   document.getElementById('brand').textContent=name+' 워크보드';
-  document.getElementById('byname').textContent=name;
+  // byline: 이름이 기본 브랜드면 브랜드만, 개인 이름이면 "by 이름 · 브랜드"
+  var lab='<a href="'+esc(CFG.labUrl)+'" id="labLink" target="_blank" rel="noopener">'+esc(BRAND)+'</a>';
+  var byHtml=(name===BRAND)? lab : ('by '+esc(name)+' · '+lab);
+  document.getElementById('byline').innerHTML=byHtml;
+  document.getElementById('footBy').textContent=(name===BRAND)? BRAND : ('by '+name+' · '+BRAND);
   document.getElementById('ver').textContent=st.version||'v1';
-  document.getElementById('labLink').href=CFG.labUrl;
-  document.getElementById('setName').value=name;
+  document.getElementById('setName').value=(name===BRAND)?'':name;
   document.getElementById('setGoal').value=st.income_goal||'';
   document.getElementById('apiUrl').value=apiUrl;
   buildChannelPresets(); buildEventPresets();
@@ -493,7 +497,6 @@ function renderSchedule(){
     S.bookings.filter(function(b){return dstr(b['날짜'])===key;}).forEach(function(b){
       items+='<div class="witem bk">'+esc(b['행사명']||b['거래처']||'섭외')+'</div>';
     });
-    var seen={};
     S.content.forEach(function(c){
       var s=c['일정']||{};
       STAGES.forEach(function(st){
@@ -502,8 +505,14 @@ function renderSchedule(){
           items+='<div class="witem ct">'+lbl+'</div>';
         }
       });
-      // 구버전(채널파생) 호환
-      var der=c['채널파생']||{}; Object.keys(der).forEach(function(n){ if(der[n]&&dstr(der[n].date)===key && !seen[c.id]){ seen[c.id]=1; items+='<div class="witem ct">'+esc(c['제목']||'콘텐츠')+'</div>'; } });
+      // 파생 채널 발행: 새 형식(문자열 날짜)·구 형식({date}) 모두 처리, 발행 채널마다 한 줄
+      var der=c['채널파생']||{};
+      Object.keys(der).forEach(function(n){
+        var dd=der[n]; var dval=(dd&&dd.date)?dd.date:dd;
+        if(dval && dstr(dval)===key){
+          items+='<div class="witem ct">['+esc(n)+'] '+esc(c['제목']||'콘텐츠')+'</div>';
+        }
+      });
     });
     html+='<div class="wday'+(isToday?' today':'')+(dow===0||dow===6?' weekend':'')+'">'+
       '<div class="wd-top"><span class="wd-dow">'+DOW[dow]+'</span>'+(isToday?'<span class="wd-today-tag">오늘</span>':'')+'</div>'+
