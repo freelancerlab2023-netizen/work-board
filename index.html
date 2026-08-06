@@ -29,15 +29,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 #spinner{display:none;font-size:13px;color:var(--blue);line-height:1}
 #spinner.on{display:inline-block;animation:rot .7s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
-.week{display:flex;gap:5px;overflow-x:auto;padding-bottom:3px}
-.wday{flex:1 0 13.5%;min-width:80px;background:var(--paper);border:0.5px solid var(--line);border-radius:9px;padding:7px 6px;min-height:96px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wday{min-width:0;background:var(--paper);border:0.5px solid var(--line);border-radius:8px;padding:5px 4px;min-height:74px;cursor:pointer;overflow:hidden}
+.wday.sel{background:#26215C;border-color:#26215C}
+.wday.sel .wd-num,.wday.sel .wd-dow,.wday.sel .wd-today-tag{color:#fff}
+.wd-more{font-size:8.5px;color:var(--faint);padding-left:2px}
 .wday.today{background:#fff;border-color:var(--violet);box-shadow:0 0 0 1px var(--violet) inset}
 .wday.weekend .wd-num{color:var(--rose)}
-.wd-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
-.wd-dow{font-size:9px;color:var(--faint);font-weight:700}
-.wd-num{font-size:14px;font-weight:700}
+.wd-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.wd-dow{font-size:8.5px;color:var(--faint);font-weight:700}
+.wd-num{font-size:13px;font-weight:700}
 .wd-today-tag{font-size:8px;color:var(--violet);font-weight:700}
-.witem{font-size:9.5px;line-height:1.35;border-radius:4px;padding:3px 5px;margin-bottom:3px;white-space:normal;word-break:break-word}
+.witem{font-size:9px;line-height:1.3;border-radius:4px;padding:2px 4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .witem.bk{background:var(--green-bg);color:#0f5c3f;border-left:2px solid var(--green)}
 .witem.ct{background:var(--violet-bg);color:#3d3593;border-left:2px solid var(--violet)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -187,15 +190,61 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
   .nb{padding:6px 10px}
   .statgrid{grid-template-columns:1fr}
 }
+
+/* ===== v1_3 스케줄 뷰 ===== */
+.segs{display:inline-flex;gap:2px;background:#efede8;border-radius:8px;padding:2px}
+.seg{border:none;background:transparent;font-size:11px;font-weight:600;color:#8a877f;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit}
+.seg.on{background:#fff;color:#26215C}
+.mrow{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.mdow{text-align:center;font-size:9px;font-weight:700;color:#a3a09a;padding-bottom:4px}
+.mcell{min-height:46px;background:var(--paper);border:0.5px solid var(--line);border-radius:7px;padding:4px 3px;text-align:center;cursor:pointer}
+.mcell.off{opacity:.35}
+.mcell.today{background:#fff;border-color:var(--violet);box-shadow:0 0 0 1px var(--violet) inset}
+.mcell.sel{background:#26215C}
+.mcell.sel .mnum,.mcell.sel .mdot{color:#fff}
+.mnum{font-size:12px;font-weight:600;display:block;margin-bottom:3px}
+.mdots{display:flex;gap:2px;justify-content:center;flex-wrap:wrap}
+.mdot{width:5px;height:5px;border-radius:50%;display:inline-block}
+.mdot.bk{background:#534AB7}
+.mdot.ct{background:#1D9E75}
+.mdetail{margin-top:9px;background:var(--paper);border-radius:9px;padding:10px 12px}
+.mdetail .md-d{font-size:11px;color:#8a877f;margin-bottom:6px}
+.mdetail .md-i{font-size:12.5px;padding:4px 0;border-bottom:0.5px solid var(--line)}
+.mdetail .md-i:last-child{border:none}
+
+/* ===== v1_2 섭외 카드 ===== */
+.wb-card{position:relative;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:13px 15px;margin-bottom:9px;cursor:pointer}
+.wb-card:active{background:#faf9f7}
+.wb-del{position:absolute;top:8px;right:8px;border:none;background:transparent;color:#c9c6bf;font-size:17px;line-height:1;cursor:pointer;padding:4px 6px}
+.wb-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;padding-right:20px}
+.wb-date{font-size:12px;color:#9b988f}
+.wb-fee{font-size:16px;font-weight:700;color:#1c1b19}
+.wb-title{font-size:14.5px;color:#1c1b19;margin-bottom:2px;padding-right:20px}
+.wb-title .tag{margin-left:6px;vertical-align:1px}
+.wb-client{font-size:12.5px;color:#6f6d69;margin-bottom:9px}
+.wb-bot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wb-tags{display:flex;flex-wrap:wrap;gap:5px}
+.wb-tag{font-size:11px;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.t-type{background:#EEEDFE;color:#3C3489}
+.t-cli{background:#E6F1FB;color:#0C447C}
+.t-role{background:#F1EFE8;color:#5F5E5A}
+.wb-settle{font-size:11px;white-space:nowrap;cursor:pointer}
+.wb-settle.ok{color:#0F6E56}
+.wb-settle.no{color:#993C1D}
+.wb-exp{width:100%;margin-bottom:12px}
+.wb-note{background:#F1EFE8;border-radius:12px;padding:13px 15px;font-size:13px;line-height:1.75;color:#4a4843;margin-bottom:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="head">
-    <div>
-      <div class="brand" id="brand">워크보드</div>
-      <div class="by" id="byline"></div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="flex:0 0 auto;line-height:0"><svg class="mark" width="21" height="29.0" viewBox="0 0 100 138" xmlns="http://www.w3.org/2000/svg"><path d="M0,138 L0,33 A33,33 0 0 1 33,0 L100,0 L100,95 A43,43 0 0 0 57,138 Z" fill="#534AB7"/><ellipse cx="42" cy="31" rx="6.6" ry="9.4" fill="#ffffff"/><ellipse cx="69" cy="31" rx="6.6" ry="9.4" fill="#ffffff"/><path d="M26,52 C40,76 80,78 99,47" fill="none" stroke="#ffffff" stroke-width="6.2" stroke-linecap="round"/></svg></span>
+      <div>
+        <div class="brand" id="brand">워크보드</div>
+        <div class="by" id="byline"></div>
+      </div>
     </div>
     <div class="sync"><span id="spinner">↻</span><span class="dot" id="syncDot"></span><span id="syncTxt">대기 중</span></div>
   </div>
@@ -215,8 +264,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
   <section class="sec on" id="sec-dash">
     <div class="stl">현황 — 한눈에</div>
     <div class="card">
-      <div class="card-h"><span>이번 주 스케줄</span><span class="hint" style="margin:0">섭외 · 콘텐츠</span></div>
+      <div class="card-h"><span id="schedTitle">2주 스케줄</span>
+        <span class="segs"><button class="seg on" data-r="2w" onclick="setSchedRange('2w')">2주</button><button class="seg" data-r="month" onclick="setSchedRange('month')">월간</button></span></div>
       <div class="week" id="weekStrip"></div>
+      <div id="monthGrid" style="display:none"></div>
+      <div id="monthDetail"></div>
     </div>
     <div class="card">
       <div class="card-h"><span>오늘 할 일</span><span class="hint" style="margin:0">탭하면 우선순위 ↑</span></div>
@@ -264,6 +316,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
     <div class="stl">이력·섭외 관리</div>
     <div class="card">
       <div class="card-h"><span>기록</span><button class="btn dark sm" onclick="openBooking()">+ 새 섭외</button></div>
+      <input id="bk_q" placeholder="검색 — 행사명 · 거래처 · 담당자 · 유형" oninput="renderBookings()" autocomplete="off"
+        style="width:100%;margin:0 0 9px;padding:9px 12px;border:.5px solid rgba(0,0,0,.12);border-radius:10px;font:inherit;font-size:13px;background:#fff">
+      <button class="btn ghost wb-exp" onclick="exportCard()">📤 활동 카드 이미지로 내보내기</button>
       <div id="bookingList"></div>
     </div>
   </section>
@@ -358,8 +413,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
       <div class="card-h">버그 제보 · 개선 제안</div>
       <div class="hint" style="margin-bottom:9px">막힌 부분이 있으면 바로 알려주세요. 세란이 직접 확인합니다.</div>
       <div class="btn-row" style="margin-top:0">
-        <button class="btn ghost sm" id="bugBtn">버그 / 제안 보내기</button>
-        <button class="btn ghost sm" id="cafeBtn">세무·법률 상담 (프리랜서연구소 카페)</button>
+        <div class="wb-note"><b>📱 폰 홈 화면에 추가하기 (30초)</b><br>
+        1. 사파리에서 이 워크보드를 엽니다<br>
+        2. 아래 공유 버튼 <b>[↑]</b> → <b>홈 화면에 추가</b><br>
+        3. 홈 화면 아이콘으로 열면 앱처럼 열려요<br>
+        <span style="color:#6f6d69">주소창 없이 바로 열리고, 매번 찾아 들어오지 않아도 됩니다.</span></div>
+      <button class="btn ghost sm" id="bugBtn">버그 / 제안 보내기</button>
+        <button class="btn ghost sm" id="subBtn">구독 안내 · 프리랜서연구소</button>
       </div>
     </div>
   </section>
@@ -375,8 +435,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
 var CFG = {
   labUrl: 'https://freelancerlab.co.kr',            // byline "프리랜서연구소" → 프리랜서 대상 홈페이지
   cafeUrl: 'https://cafe.naver.com/freelancerlab',  // 세무·법률 상담 카페
-  trialUntil: '2026-08-03',   // ▶ 체험 종료일(YYYY-MM-DD, 이 날까지 사용 가능). 이후 워크보드 잠김. 연장하려면 이 날짜만 수정.
-  unlockCode: 'FREElANCERLAB-UNLOCK',   // ▶ 세란/유료 전환자용 해제코드(비공개 유지, 원하는 값으로 변경). 잠금화면에서 입력 시 이 기기 영구 해제.
+  trialDays: 28,              // ▶ 첫 연결일 기준 체험 일수. 시작일이 달라도 각자 28일. 0으로 두면 잠금 비활성.
+  verifyUrl: 'https://script.google.com/macros/s/AKfycbzVVXseo2Ss_UeebIevmm-IDzFFma_DdlC0AwRJp3rgLHnXiT2A8tcsQ6QBycCAFFYP/exec',   // 코드 검증 웹앱 (코드관리 시트)
+  fallbackCode: 'FREELANCERLAB-UNLOCK',   // verifyUrl 비었을 때 쓰는 임시 코드
+  surveyUrl: 'https://forms.gle/7cBZsm6kLqzzpDWD9',
+  subscribeUrl: 'https://freelancerlab.co.kr',
+  clientTypes: ['기업','지자체·공공','방송·미디어','교육기관','개인·소상공인','기타'],
   campaignTemplates: [
     { 유형:'시즌 인사', 이름:'설 인사', 문구:'[담당자명]님, 권세란입니다.\n풍요로운 설 명절 보내시길 바랍니다. 지난 [거래처명]과의 인연에 깊이 감사드리며, 올 한 해도 좋은 자리에서 함께할 수 있기를 기대합니다.\n새해 복 많이 받으세요.' },
     { 유형:'시즌 인사', 이름:'추석 인사', 문구:'[담당자명]님, 권세란입니다.\n넉넉하고 따뜻한 한가위 보내시길 바랍니다. 늘 변함없이 챙겨 주셔서 감사드리며, 다가오는 행사에서도 좋은 호흡으로 함께하겠습니다.' },
@@ -432,26 +496,43 @@ function loadAll(manual){
     if(!res.ok) throw new Error(res.error||'읽기 실패');
     S.settings=res.settings||{}; S.bookings=res.bookings||[]; S.content=res.content||[]; S.income=res.income||[]; S.campaigns=res.campaigns||[];
     lsSet('wb_cache',S); applySettings(S.settings); renderAll(); setSync('ok','연결됨');
+    checkGate();
     if(manual) toast('새로고침 완료');
   }).catch(function(e){
     var c=lsGet('wb_cache',true); if(c){ S=c; applySettings(S.settings); renderAll(); }
     setSync('err','연결 오류'); toast('연결 실패: '+e.message);
   });
 }
-var saving=false;
+var saving=false, writeQueue=[], lastFailedWrite=null;
 function write(action, data, okMsg, keepOpen){
   if(!apiUrl){ toast('먼저 Sheets를 연결하세요 (설정 탭)'); go('settings'); return; }
-  if(saving){ toast('처리 중입니다…'); return; }
+  if(saving){ writeQueue.push([action,data,okMsg,true]); toast('앞선 저장이 끝나면 자동으로 이어서 저장됩니다'); if(!keepOpen) closeModal(); return; }
   saving=true; setSync('busy','저장 중…');
   if(!keepOpen) closeModal();                 // 즉시 닫아 체감속도 ↑ (전송은 뒤에서)
-  apiPost(action,data).then(function(res){
-    if(!res.ok) throw new Error(res.error||'저장 실패');
+  function attempt(n){
+    return apiPost(action,data).then(function(res){
+      if(!res.ok) throw new Error(res.error||'저장 실패');
+      return res;
+    }).catch(function(e){
+      if(n<1){ setSync('busy','다시 시도 중…'); return new Promise(function(r){ setTimeout(r,1500); }).then(function(){ return attempt(n+1); }); }
+      throw e;
+    });
+  }
+  function next(){ if(writeQueue.length){ var w=writeQueue.shift(); write(w[0],w[1],w[2],w[3]); } }
+  attempt(0).then(function(){
     if(okMsg) toast(okMsg); return apiGet();
   }).then(function(res){
     if(res&&res.ok){ S.settings=res.settings;S.bookings=res.bookings;S.content=res.content;S.income=res.income;S.campaigns=res.campaigns||[]; lsSet('wb_cache',S); applySettings(S.settings); renderAll(); }
     saving=false; setSync('ok','저장됨 ✓'); setTimeout(function(){ if(!saving) setSync('ok','연결됨'); },1600);
-  }).catch(function(e){ saving=false; setSync('err','오류'); toast('저장 실패: '+e.message); });
+    next();
+  }).catch(function(e){
+    saving=false; setSync('err','저장 안 됨');
+    lastFailedWrite=[action,data,okMsg];
+    showBanner('방금 입력한 항목이 <b>저장되지 않았습니다</b> ('+e.message+'). <b onclick="retryLastWrite()" style="cursor:pointer;text-decoration:underline">여기를 눌러 다시 저장</b>');
+    next();
+  });
 }
+function retryLastWrite(){ if(!lastFailedWrite) return; hideBanner(); var w=lastFailedWrite; lastFailedWrite=null; write(w[0],w[1],w[2],true); }
 window.addEventListener('beforeunload', function(e){ if(saving){ e.preventDefault(); e.returnValue='저장 중인 항목이 있습니다. 잠시 후 닫아주세요.'; return e.returnValue; } });
 
 /* ===================== 설정 ===================== */
@@ -487,36 +568,99 @@ function lastMonths(n){ var out=[],d=new Date(); for(var i=n-1;i>=0;i--){ var x=
 
 /* ===================== 렌더 ===================== */
 function renderAll(){ renderSchedule(); renderTasks(); renderDash(); renderBookings(); renderClients(); renderCampaigns(); renderContent(); renderIncomeMonths(); renderUnsettled(); }
+var schedRange = lsGet('wb_sched') || '2w';
+var schedSel = '';
+function setSchedRange(r){
+  schedRange=r; lsSet('wb_sched',r); schedSel='';
+  [].slice.call(document.querySelectorAll('.seg')).forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-r')===r); });
+  renderSchedule();
+}
+/* 날짜별 항목 — 섭외 + 콘텐츠 일정 + 파생 발행 */
+function dayItems(key){
+  var out=[];
+  S.bookings.filter(function(b){return dstr(b['날짜'])===key;}).forEach(function(b){
+    out.push({k:'bk', t:(b['행사명']||b['거래처']||'섭외')});
+  });
+  S.content.forEach(function(c){
+    var sc=c['일정']||{};
+    STAGES.forEach(function(st){
+      if(sc[st] && dstr(sc[st])===key) out.push({k:'ct', t:(st==='업로드'? (c['제목']||'콘텐츠') : '['+st+'] '+(c['제목']||'콘텐츠'))});
+    });
+    var der=c['채널파생']||{};
+    Object.keys(der).forEach(function(n){
+      var dd=der[n]; var dval=(dd&&dd.date)?dd.date:dd;
+      if(dval && dstr(dval)===key) out.push({k:'ct', t:'['+n+'] '+(c['제목']||'콘텐츠')});
+    });
+  });
+  return out;
+}
 function renderSchedule(){
+  var t=document.getElementById('schedTitle');
+  if(t) t.textContent = (schedRange==='month') ? '월간 스케줄' : '2주 스케줄';
+  var ws=document.getElementById('weekStrip'), mg=document.getElementById('monthGrid'), md=document.getElementById('monthDetail');
+  if(schedRange==='month'){
+    if(ws) ws.style.display='none';
+    if(mg) mg.style.display='block';
+    renderMonthGrid(); return;
+  }
+  if(ws) ws.style.display='grid';
+  if(mg){ mg.style.display='none'; mg.innerHTML=''; }
+  renderStrip();
+  renderDayDetail();
+}
+function renderMonthGrid(){
+  var DOW=['일','월','화','수','목','금','토'];
+  var n=new Date(), y=n.getFullYear(), m=n.getMonth();
+  var first=new Date(y,m,1), start=new Date(y,m,1-first.getDay());
+  var tk=today();
+  var h='<div class="mrow">'+DOW.map(function(x){return '<div class="mdow">'+x+'</div>';}).join('')+'</div><div class="mrow">';
+  for(var i=0;i<42;i++){
+    var dt=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i);
+    var key=dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2);
+    var items=dayItems(key);
+    var nbk=items.filter(function(x){return x.k==='bk';}).length;
+    var nct=items.length-nbk;
+    var dots='';
+    if(nbk) dots+='<span class="mdot bk"></span>';
+    if(nct) dots+='<span class="mdot ct"></span>';
+    var cls='mcell'+(dt.getMonth()!==m?' off':'')+(key===tk?' today':'')+(key===schedSel?' sel':'');
+    h+='<div class="'+cls+'" onclick="pickDay(\''+key+'\')"><span class="mnum">'+dt.getDate()+'</span><span class="mdots">'+dots+'</span></div>';
+    if(i%7===6 && i<41) h+='</div><div class="mrow">';
+  }
+  h+='</div>';
+  document.getElementById('monthGrid').innerHTML=h;
+  renderDayDetail();
+}
+function pickDay(key){
+  schedSel=(schedSel===key)?'':key;
+  if(schedRange==='month'){ renderMonthGrid(); }
+  else { renderStrip(); renderDayDetail(); }
+}
+function renderDayDetail(){
+  var el=document.getElementById('monthDetail'); if(!el) return;
+  if(!schedSel){ el.innerHTML=''; return; }
+  var items=dayItems(schedSel);
+  var d=new Date(schedSel);
+  var lbl=(d.getMonth()+1)+'월 '+d.getDate()+'일';
+  el.innerHTML='<div class="mdetail"><div class="md-d">'+lbl+'</div>'+
+    (items.length? items.map(function(x){return '<div class="md-i">'+esc(x.t)+'</div>';}).join('')
+                 : '<div class="md-i" style="color:#a3a09a">일정이 없어요</div>')+'</div>';
+}
+function renderStrip(){
   var DOW=['일','월','화','수','목','금','토'];
   var base=new Date(); base.setHours(0,0,0,0);
+  var tk=today();
+  var start=new Date(base.getFullYear(),base.getMonth(),base.getDate()-base.getDay());  // 이번 주 일요일
   var html='';
-  for(var off=-1; off<=5; off++){
-    var d=new Date(base.getFullYear(),base.getMonth(),base.getDate()+off);
+  for(var off=0; off<14; off++){
+    var d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+off);
     var key=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-    var isToday=(off===0), dow=d.getDay();
-    var items='';
-    S.bookings.filter(function(b){return dstr(b['날짜'])===key;}).forEach(function(b){
-      items+='<div class="witem bk">'+esc(b['행사명']||b['거래처']||'섭외')+'</div>';
-    });
-    S.content.forEach(function(c){
-      var s=c['일정']||{};
-      STAGES.forEach(function(st){
-        if(s[st] && dstr(s[st])===key){
-          var lbl = (st==='업로드') ? esc(c['제목']||'콘텐츠') : '['+st+'] '+esc(c['제목']||'콘텐츠');
-          items+='<div class="witem ct">'+lbl+'</div>';
-        }
-      });
-      // 파생 채널 발행: 새 형식(문자열 날짜)·구 형식({date}) 모두 처리, 발행 채널마다 한 줄
-      var der=c['채널파생']||{};
-      Object.keys(der).forEach(function(n){
-        var dd=der[n]; var dval=(dd&&dd.date)?dd.date:dd;
-        if(dval && dstr(dval)===key){
-          items+='<div class="witem ct">['+esc(n)+'] '+esc(c['제목']||'콘텐츠')+'</div>';
-        }
-      });
-    });
-    html+='<div class="wday'+(isToday?' today':'')+(dow===0||dow===6?' weekend':'')+'">'+
+    var isToday=(key===tk), dow=d.getDay();
+    var all=dayItems(key);
+    var items=all.slice(0,2).map(function(x){ return '<div class="witem '+x.k+'">'+esc(x.t)+'</div>'; }).join('');
+    if(all.length>2) items+='<div class="wd-more">+'+(all.length-2)+'</div>';
+    html+='<div class="wday'+(isToday?' today':'')+(dow===0||dow===6?' weekend':'')+(key===schedSel?' sel':'')+
+      '" onclick="pickDay(\''+key+'\')">'+
       '<div class="wd-top"><span class="wd-dow">'+DOW[dow]+'</span>'+(isToday?'<span class="wd-today-tag">오늘</span>':'')+'</div>'+
       '<div class="wd-num">'+d.getDate()+'</div>'+items+'</div>';
   }
@@ -605,14 +749,31 @@ function renderBookings(){
   var el=document.getElementById('bookingList');
   if(!S.bookings.length){ el.innerHTML='<div class="empty">아직 기록이 없습니다.<br>첫 섭외를 기록해 보세요.</div>'; return; }
   var rows=S.bookings.slice().sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');});
-  el.innerHTML=rows.map(function(b){
-    var sub=esc(dstr(b['날짜']))+' · '+esc(b['유형']||'')+(b['거래처']?' · '+esc(b['거래처']):'')+(b['담당자']?' · '+esc(b['담당자']):'');
-    var settled=isSettled(b);
-    var chip='<span class="tag '+(settled?'green':'gray')+'" style="cursor:pointer" onclick="event.stopPropagation();toggleSettle(\''+b.id+'\')">'+(settled?'정산✓':'미정산')+'</span>';
-    return '<div class="row"><div class="row-main" onclick="openBooking(\''+b.id+'\')" style="cursor:pointer">'+
-      '<div class="row-t">'+esc(b['행사명']||'(행사명 미입력)')+statusTag(b['상태'])+'</div><div class="row-s">'+sub+'</div></div>'+
-      '<div class="row-r">'+won(b['단가'])+'<br>'+chip+'</div><button class="icon-x" onclick="delBooking(\''+b.id+'\')">×</button></div>';
-  }).join('');
+  var qEl=document.getElementById('bk_q'); var q=(qEl&&qEl.value?qEl.value:'').trim().toLowerCase();
+  if(q){
+    var KS=['행사명','거래처','담당자','유형','역할','메모'];
+    rows=rows.filter(function(b){ for(var i=0;i<KS.length;i++){ if(String(b[KS[i]]||'').toLowerCase().indexOf(q)>=0) return true; } return false; });
+    if(!rows.length){ el.innerHTML='<div class="empty">"'+esc(q)+'" 검색 결과가 없습니다.</div>'; return; }
+  }
+  el.innerHTML=rows.map(bookingCard).join('');
+}
+/* v1_2 — 줄글 목록 → 카드. 날짜·금액·상태가 항상 같은 자리에 온다. */
+function bookingCard(b){
+  var settled=isSettled(b);
+  var dt=dstr(b['날짜']);
+  var dLabel=dt? (Number(dt.slice(5,7))+'월 '+Number(dt.slice(8,10))+'일') : '날짜 없음';
+  var tags='';
+  if(b['유형'])   tags+='<span class="wb-tag t-type">'+esc(b['유형'])+'</span>';
+  if(b['발주처']) tags+='<span class="wb-tag t-cli">'+esc(b['발주처'])+'</span>';
+  if(b['역할'])   tags+='<span class="wb-tag t-role">'+esc(b['역할'])+'</span>';
+  var settleChip='<span class="wb-settle '+(settled?'ok':'no')+'" onclick="event.stopPropagation();toggleSettle(\''+b.id+'\')">●&nbsp;'+(settled?'정산완료':'미정산')+'</span>';
+  return '<div class="wb-card" onclick="openBooking(\''+b.id+'\')">'+
+    '<button class="wb-del" onclick="event.stopPropagation();delBooking(\''+b.id+'\')">×</button>'+
+    '<div class="wb-top"><span class="wb-date">'+esc(dLabel)+'</span><span class="wb-fee">'+won(b['단가'])+'</span></div>'+
+    '<div class="wb-title">'+esc(b['행사명']||'(행사명 미입력)')+statusTag(b['상태'])+'</div>'+
+    (b['거래처']? '<div class="wb-client">'+esc(b['거래처'])+(b['담당자']?' · '+esc(b['담당자']):'')+'</div>':'')+
+    '<div class="wb-bot"><div class="wb-tags">'+tags+'</div>'+settleChip+'</div>'+
+  '</div>';
 }
 var extraDates=[];
 function uniqArr(a){ var s={},o=[]; a.forEach(function(x){ if(x&&!s[x]){s[x]=1;o.push(x);} }); return o; }
@@ -633,6 +794,7 @@ function openBookingCopy(id){
 function buildBookingModal(b, mode){
   extraDates=[];
   var evOpts=eventTypes().map(function(t){return '<option '+(b['유형']===t?'selected':'')+'>'+esc(t)+'</option>';}).join('');
+  var ctOpts='<option value=""></option>'+CFG.clientTypes.map(function(t){return '<option '+(b['발주처']===t?'selected':'')+'>'+esc(t)+'</option>';}).join('');
   var dlCli='<datalist id="dl_cli">'+clientList().map(function(o){return '<option value="'+esc(o)+'">';}).join('')+'</datalist>';
   var dlMgr='<datalist id="dl_mgr">'+mgrList().map(function(o){return '<option value="'+esc(o)+'">';}).join('')+'</datalist>';
   var repeatBlock = (mode==='new')
@@ -651,7 +813,8 @@ function buildBookingModal(b, mode){
     repeatBlock+
     field('행사명','<input id="b_title" placeholder="예: KT클라우드 신제품 발표회 (주최처 함께 기입)" value="'+esc(b['행사명']||'')+'">')+
     field('거래처 (결제 주체 · 대행 가능)','<input id="b_client" list="dl_cli" onchange="prefillClient()" value="'+esc(b['거래처']||'')+'">')+
-    '<div class="fg2">'+field('유형','<select id="b_type" onchange="syncCat()">'+evOpts+'</select>')+field('역할','<input id="b_role" value="'+esc(b['역할']||'')+'">')+'</div>'+
+    '<div class="fg2">'+field('유형','<select id="b_type" onchange="syncCat()">'+evOpts+'</select>')+field('발주처 유형','<select id="b_ctype">'+ctOpts+'</select>')+'</div>'+
+    field('역할','<input id="b_role" value="'+esc(b['역할']||'')+'">')+
     '<div class="fg2">'+field('단가(원)','<input id="b_fee" type="number" value="'+(b['단가']||'')+'">')+field('소요시간','<input id="b_dur" value="'+esc(b['소요시간']||'')+'">')+'</div>'+
     '<div class="fg2">'+field('수입분류 (수입 집계)','<select id="b_cat"><option>출연료</option><option>강의료</option><option>상품판매</option><option>저작권료</option></select>')+
       '<div><label>정산</label><label style="display:flex;align-items:center;gap:7px;height:38px;margin:0;font-size:12px;color:var(--ink);text-transform:none;font-weight:400"><input type="checkbox" id="b_settle" style="width:auto"> 정산 완료 → 종료·수입 반영</label></div>'+'</div>'+
@@ -687,7 +850,7 @@ function prefillClient(){
 function saveBooking(mode){
   var settled=document.getElementById('b_settle').checked;
   var status=val('b_status'); if(settled) status='종료';   // 정산 완료 → 자동 종료
-  var base={ '행사명':val('b_title'),'거래처':val('b_client'),'유형':val('b_type'),'역할':val('b_role'),'단가':val('b_fee'),'소요시간':val('b_dur'),
+  var base={ '행사명':val('b_title'),'거래처':val('b_client'),'유형':val('b_type'),'발주처':val('b_ctype'),'역할':val('b_role'),'단가':val('b_fee'),'소요시간':val('b_dur'),
     '상태':status,'담당자':val('b_mgr'),'전화':val('b_tel'),'이메일':val('b_email'),
     '정산':settled,'수입분류':val('b_cat'),'메모':val('b_memo') };
   if(!base['행사명']){ toast('행사명을 입력하세요'); return; }
@@ -1065,39 +1228,161 @@ function showBanner(html){ var b=document.getElementById('banner'); b.innerHTML=
 function hideBanner(){ document.getElementById('banner').classList.remove('show'); }
 document.getElementById('bugBtn').onclick=function(){ var name=(S.settings.user_name||'사용자');
   location.href='mailto:'+CFG.bugTo+'?subject='+encodeURIComponent('[워크보드 v1] 버그/제안 — '+name)+'&body='+encodeURIComponent('무엇을 하려다 막혔나요?\n\n어떤 화면/탭인가요?\n\n버전: v1'); };
-document.getElementById('cafeBtn').onclick=function(){ if(CFG.cafeUrl){ window.open(CFG.cafeUrl,'_blank'); } else { toast('카페 링크 준비 중입니다'); } };
+document.getElementById('subBtn').onclick=function(){ window.open(CFG.subscribeUrl,'_blank'); };
 
-/* ===================== 체험 만료 장치 ===================== */
-// CFG.trialUntil(포함) 이후 워크보드 UI를 잠급니다. 데이터는 사용자 구글 시트에 그대로 남습니다(잠기는 건 도구뿐).
-//  - 연장: 호스팅된 이 파일의 CFG.trialUntil 날짜만 바꾸면 전원에게 즉시 적용.
-//  - 세란/유료 전환자: 잠금화면에서 해제코드 입력 → 이 기기에서 영구 해제.
-//  - trialUntil을 ''(빈 값)으로 두면 잠금 비활성(유료 정식 버전 등).
-function trialUnlocked(){ return lsGet('wb_unlock') === CFG.unlockCode; }
-function trialExpired(){ return !!CFG.trialUntil && today() > CFG.trialUntil && !trialUnlocked(); }
+/* ===================== 체험 게이트 (v1_2) =====================
+   고정 날짜가 아니라 "첫 연결일 + CFG.trialDays"로 사람마다 각자 계산한다.
+   기준값(trial_start / unlock_code)은 구글 시트 [설정·메타]에 저장 →
+   기기를 바꿔도, 브라우저를 지워도 유지된다.
+   해제 코드는 CFG.verifyUrl(세란 검증 웹앱)에서 확인하고, 그 순간 활성화 로그가 남는다.
+*/
+/* 익명 식별자 — 개인정보가 아니라 "몇 명이 언제 시작했는가"를 세는 용도.
+   이름·이메일·기록은 절대 보내지 않는다. */
+function newAid(){ return 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function pingStart(aid){
+  if(!CFG.verifyUrl) return;
+  try{
+    fetch(CFG.verifyUrl, { method:'POST', body: JSON.stringify({ event:'start', aid:aid }) })
+      .catch(function(){});
+  }catch(e){}
+}
+function gateUnlocked(){ return !!(S.settings && S.settings.unlock_code) || !!lsGet('wb_unlock'); }
+
+function checkGate(){
+  if(!CFG.trialDays) return;
+  var st = S.settings || {};
+  if(st.unlock_code){ lsSet('wb_unlock', st.unlock_code); return; }
+  if(lsGet('wb_unlock')) return;
+
+  if(!st.trial_start){                       // 첫 연결 — 이 순간이 체험 시작일
+    var aid = st.aid || newAid();
+    S.settings.trial_start = today();
+    S.settings.aid = aid;
+    apiPost('settings.save', { trial_start: today(), aid: aid });
+    pingStart(aid);                          // 익명 시작 신호 (이름·데이터 안 보냄)
+    return;
+  }
+  var left = CFG.trialDays - daysBetween(dstr(st.trial_start), today());
+  if(left > 0){ if(left <= 13) showTrialBanner(left); return; }
+  showLock();
+}
+
+function showTrialBanner(left){
+  showBanner(left <= 7
+    ? '체험 D-' + left + ' · 설문 남기시면 계속 무료로 쓰실 수 있어요 <b onclick="window.open(CFG.surveyUrl,\'_blank\')" style="cursor:pointer;text-decoration:underline">설문 남기기</b>'
+    : '체험 ' + left + '일 남았어요');
+}
+
 function showLock(){
+  if(document.getElementById('lockScreen')) return;
   var d=document.createElement('div'); d.id='lockScreen';
-  d.style.cssText='position:fixed;inset:0;z-index:9999;background:#f7f6f3;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit;';
-  d.innerHTML='<div style="max-width:420px;text-align:center;">'
-    +'<div style="width:56px;height:56px;border-radius:16px;background:#534AB7;margin:0 auto 20px;"></div>'
-    +'<div style="font-size:24px;font-weight:700;color:#1c1b19;margin-bottom:12px;">체험 기간이 종료되었습니다</div>'
-    +'<div style="font-size:15px;line-height:1.7;color:#6f6d69;margin-bottom:6px;">기록하신 <b>데이터는 구글 시트에 그대로</b> 있습니다. 잠긴 것은 워크보드 도구뿐이에요.</div>'
-    +'<div style="font-size:15px;line-height:1.7;color:#6f6d69;margin-bottom:24px;">계속 사용하시려면 구독을 문의해 주세요.</div>'
-    +'<a href="mailto:'+CFG.bugTo+'?subject='+encodeURIComponent('[워크보드] 구독 문의')+'" style="display:inline-block;background:#1c1b19;color:#fff;text-decoration:none;padding:14px 28px;border-radius:28px;font-size:15px;font-weight:600;">구독 문의하기</a>'
-    +'<div style="margin-top:28px;">'
-    +'<input id="unlockInput" placeholder="해제 코드" style="border:1px solid #e5e2db;border-radius:10px;padding:11px 14px;font-size:14px;width:150px;text-align:center;">'
-    +'<button id="unlockBtn" style="margin-left:8px;border:none;background:#ECEAF7;color:#534AB7;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;">해제</button>'
-    +'</div></div>';
+  d.style.cssText='position:fixed;inset:0;z-index:9999;background:#f7f6f3;display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit;overflow:auto;';
+  d.innerHTML='<div style="max-width:400px;width:100%;text-align:center;">'
+    +'<div style="margin:0 auto 20px;line-height:0"><svg class="mark" width="46" height="63.5" viewBox="0 0 100 138" xmlns="http://www.w3.org/2000/svg"><path d="M0,138 L0,33 A33,33 0 0 1 33,0 L100,0 L100,95 A43,43 0 0 0 57,138 Z" fill="#534AB7"/><ellipse cx="42" cy="31" rx="6.6" ry="9.4" fill="#ffffff"/><ellipse cx="69" cy="31" rx="6.6" ry="9.4" fill="#ffffff"/><path d="M26,52 C40,76 80,78 99,47" fill="none" stroke="#ffffff" stroke-width="6.2" stroke-linecap="round"/></svg></div>'
+    +'<div style="font-size:21px;font-weight:700;color:#1c1b19;margin-bottom:12px;line-height:1.45;">기록하신 데이터는<br>그대로 있어요</div>'
+    +'<div style="font-size:14.5px;line-height:1.75;color:#6f6d69;margin-bottom:26px;">4주 체험이 끝났습니다.<br>설문에 의견을 남겨주시면 <b style="color:#1c1b19">영구 이용 코드</b>를 보내드려요.</div>'
+    +'<a href="'+esc(CFG.surveyUrl)+'" target="_blank" rel="noopener" style="display:block;background:#1c1b19;color:#fff;text-decoration:none;padding:15px;border-radius:12px;font-size:15px;font-weight:600;margin-bottom:22px;">설문 남기기</a>'
+    +'<input id="unlockInput" placeholder="이용 코드 입력" autocapitalize="characters" style="border:1px solid #e5e2db;border-radius:11px;padding:13px;font-size:15px;width:100%;box-sizing:border-box;text-align:center;margin-bottom:8px;">'
+    +'<button id="unlockBtn" style="width:100%;border:1px solid #1c1b19;background:#fff;color:#1c1b19;border-radius:11px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;">코드 확인</button>'
+    +'<div id="unlockMsg" style="font-size:13px;color:#993556;min-height:19px;margin-top:10px;"></div>'
+    +'<div style="font-size:12.5px;color:#9b988f;margin-top:14px;">궁금한 점은 채널로 편하게 남겨주세요</div>'
+    +'</div>';
   document.body.appendChild(d);
-  document.getElementById('unlockBtn').onclick=function(){
-    var v=(document.getElementById('unlockInput').value||'').trim();
-    if(v===CFG.unlockCode){ lsSet('wb_unlock', v); location.reload(); }
-    else { document.getElementById('unlockInput').style.borderColor='#993556'; }
-  };
+  document.getElementById('unlockBtn').onclick=function(){ redeemCode(document.getElementById('unlockInput').value); };
+  document.getElementById('unlockInput').addEventListener('keydown',function(e){ if(e.key==='Enter') redeemCode(this.value); });
+}
+
+function redeemCode(v){
+  v=String(v||'').trim().toUpperCase();
+  var btn=document.getElementById('unlockBtn'), msg=document.getElementById('unlockMsg');
+  function fail(m){ if(msg) msg.textContent=m; if(btn){ btn.disabled=false; btn.textContent='코드 확인'; } }
+  if(!v){ fail('코드를 입력해 주세요.'); return; }
+  if(btn){ btn.disabled=true; btn.textContent='확인 중…'; }
+  if(msg) msg.textContent='';
+
+  if(!CFG.verifyUrl){
+    if(v===String(CFG.fallbackCode).toUpperCase()) unlockOk(v); else fail('코드를 다시 확인해 주세요.');
+    return;
+  }
+  fetch(CFG.verifyUrl, { method:'POST', body: JSON.stringify({ code:v, name:(S.settings.user_name||''), aid:(S.settings.aid||'') }) })
+    .then(function(r){ return r.json(); })
+    .then(function(o){ if(o && o.valid) unlockOk(v); else fail((o&&o.message)||'코드를 다시 확인해 주세요.'); })
+    .catch(function(){ fail('연결이 불안정해요. 잠시 후 다시 시도해 주세요.'); });
+}
+
+function unlockOk(v){
+  lsSet('wb_unlock', v);
+  apiPost('settings.save', { unlock_code: v });   // 시트에도 저장 → 기기 바뀌어도 유지
+  setTimeout(function(){ location.reload(); }, 500);
+}
+
+/* ===================== 활동 카드 내보내기 (v1_2) =====================
+   ⚠️ 금액은 절대 넣지 않는다. 자기 PR용이지 정보 공개 장치가 아니다.
+*/
+/* 프리랜서연구소 심볼 — 캔버스용 */
+function drawMark(x, ox, oy, w){
+  var s=w/100;
+  x.save(); x.translate(ox,oy); x.scale(s,s);
+  var body=new Path2D('M0,138 L0,33 A33,33 0 0 1 33,0 L100,0 L100,95 A43,43 0 0 0 57,138 Z');
+  x.fillStyle='#534AB7'; x.fill(body);
+  x.fillStyle='#FFFFFF';
+  x.beginPath(); x.ellipse(42,31,6.6,9.4,0,0,Math.PI*2); x.fill();
+  x.beginPath(); x.ellipse(69,31,6.6,9.4,0,0,Math.PI*2); x.fill();
+  var smile=new Path2D('M26,52 C40,76 80,78 99,47');
+  x.strokeStyle='#FFFFFF'; x.lineWidth=6.2; x.lineCap='round'; x.stroke(smile);
+  x.restore();
+}
+function exportCard(){
+  var now=new Date(), y=now.getFullYear(), h=(now.getMonth()<6);
+  var from=y+'-'+(h?'01':'07'), to=y+'-'+(h?'06':'12');
+  var rows=S.bookings.filter(function(b){ var m=ym(b['날짜']); return m>=from && m<=to && b['상태']!=='제안'; });
+  if(!rows.length){ toast('내보낼 활동 기록이 아직 없어요'); return; }
+
+  function top(key,n){
+    var c={}; rows.forEach(function(b){ var v=b[key]; if(v) c[v]=(c[v]||0)+1; });
+    return Object.keys(c).sort(function(a,b2){return c[b2]-c[a];}).slice(0,n).map(function(k){ return k+' '+c[k]; });
+  }
+  var W=800,H=1000,cv=document.createElement('canvas');
+  cv.width=W; cv.height=H;
+  var x=cv.getContext('2d');
+  x.fillStyle='#F7F6F3'; x.fillRect(0,0,W,H);
+  x.fillStyle='#FFFFFF'; x.fillRect(48,48,W-96,H-96);
+
+  x.fillStyle='#9B988F'; x.font='500 26px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(y+'년 '+(h?'상반기':'하반기'), 96, 150);
+
+  x.fillStyle='#1C1B19'; x.font='700 86px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
+  x.fillText('섭외 '+rows.length+'건', 96, 250);
+
+  x.fillStyle='#EDEBE5'; x.fillRect(96,300,W-192,1);
+
+  var yy=370;
+  function block(label, items){
+    if(!items.length) return;
+    x.fillStyle='#9B988F'; x.font='500 24px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
+    x.fillText(label, 96, yy); yy+=46;
+    x.fillStyle='#1C1B19'; x.font='500 32px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
+    items.forEach(function(t){ x.fillText(t, 96, yy); yy+=46; });
+    yy+=34;
+  }
+  block('업무 유형', top('유형',4));
+  block('발주처', top('발주처',4));
+
+  x.fillStyle='#EDEBE5'; x.fillRect(96,H-190,W-192,1);
+  drawMark(x, 96, H-160, 30);
+  x.fillStyle='#6F6D69'; x.font='500 25px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
+  x.fillText('프리랜서연구소', 140, H-126);
+
+  var a=document.createElement('a');
+  a.download='워크보드_'+y+(h?'_상반기':'_하반기')+'.png';
+  a.href=cv.toDataURL('image/png');
+  a.click();
+  toast('이미지로 저장했어요');
 }
 
 /* ===================== 시작 ===================== */
-if(trialExpired()){ showLock(); }
-else { applySettings({}); loadAll(); }
+[].slice.call(document.querySelectorAll('.seg')).forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-r')===schedRange); });
+applySettings({}); loadAll();
 </script>
 </body>
 </html>
