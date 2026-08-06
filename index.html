@@ -318,7 +318,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
       <div class="card-h"><span>기록</span><button class="btn dark sm" onclick="openBooking()">+ 새 섭외</button></div>
       <input id="bk_q" placeholder="검색 — 행사명 · 거래처 · 담당자 · 유형" oninput="renderBookings()" autocomplete="off"
         style="width:100%;margin:0 0 9px;padding:9px 12px;border:.5px solid rgba(0,0,0,.12);border-radius:10px;font:inherit;font-size:13px;background:#fff">
-      <button class="btn ghost wb-exp" onclick="exportCard()">📤 활동 카드 이미지로 내보내기</button>
+      <button class="btn ghost wb-exp" onclick="exportCard()">📤 이달의 기록 이미지로 저장</button>
       <div id="bookingList"></div>
     </div>
   </section>
@@ -1336,47 +1336,67 @@ function drawMark(x, ox, oy, w){
   x.restore();
 }
 function exportCard(){
-  var now=new Date(), y=now.getFullYear(), h=(now.getMonth()<6);
-  var from=y+'-'+(h?'01':'07'), to=y+'-'+(h?'06':'12');
-  var rows=S.bookings.filter(function(b){ var m=ym(b['날짜']); return m>=from && m<=to && b['상태']!=='제안'; });
+  // 데이터가 있는 최근 달 기준 (이번 달이 비면 지난달)
+  function rowsOf(m){ return S.bookings.filter(function(b){ return ym(b['날짜'])===m && b['상태']!=='제안'; }); }
+  var m=curMonth(), rows=rowsOf(m);
+  if(!rows.length){
+    var pv=new Date(); pv.setDate(1); pv.setMonth(pv.getMonth()-1);
+    m=pv.getFullYear()+'-'+('0'+(pv.getMonth()+1)).slice(-2); rows=rowsOf(m);
+  }
   if(!rows.length){ toast('내보낼 활동 기록이 아직 없어요'); return; }
 
   function top(key,n){
-    var c={}; rows.forEach(function(b){ var v=b[key]; if(v) c[v]=(c[v]||0)+1; });
-    return Object.keys(c).sort(function(a,b2){return c[b2]-c[a];}).slice(0,n).map(function(k){ return k+' '+c[k]; });
+    var c={}; rows.forEach(function(b){ var v=String(b[key]||'').trim(); if(v) c[v]=(c[v]||0)+1; });
+    return Object.keys(c).sort(function(a,b2){return c[b2]-c[a];}).slice(0,n)
+      .map(function(k){ return { k:k, n:c[k] }; });
   }
+  var name=(S.settings.user_name||'').trim();
+  if(!name || name==='프리랜서연구소') name='';
+
   var W=800,H=1000,cv=document.createElement('canvas');
   cv.width=W; cv.height=H;
   var x=cv.getContext('2d');
+  var F='-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
   x.fillStyle='#F7F6F3'; x.fillRect(0,0,W,H);
   x.fillStyle='#FFFFFF'; x.fillRect(48,48,W-96,H-96);
 
-  x.fillStyle='#9B988F'; x.font='500 26px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
-  x.fillText(y+'년 '+(h?'상반기':'하반기'), 96, 150);
+  x.fillStyle='#9B988F'; x.font='500 26px '+F;
+  x.fillText((name? name+'님의 ':'')+'월간 기록', 96, 148);
 
-  x.fillStyle='#1C1B19'; x.font='700 86px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
-  x.fillText('섭외 '+rows.length+'건', 96, 250);
+  x.fillStyle='#1C1B19'; x.font='700 44px '+F;
+  x.fillText(Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월', 96, 208);
 
-  x.fillStyle='#EDEBE5'; x.fillRect(96,300,W-192,1);
+  x.fillStyle='#534AB7'; x.font='700 76px '+F;
+  x.fillText('섭외 '+rows.length+'건', 96, 300);
 
-  var yy=370;
-  function block(label, items){
+  x.fillStyle='#EDEBE5'; x.fillRect(96,344,W-192,1);
+
+  var yy=410;
+  function block(label, items, joiner){
     if(!items.length) return;
-    x.fillStyle='#9B988F'; x.font='500 24px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
-    x.fillText(label, 96, yy); yy+=46;
-    x.fillStyle='#1C1B19'; x.font='500 32px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
-    items.forEach(function(t){ x.fillText(t, 96, yy); yy+=46; });
-    yy+=34;
+    x.fillStyle='#9B988F'; x.font='500 24px '+F;
+    x.fillText(label, 96, yy); yy+=44;
+    x.fillStyle='#1C1B19'; x.font='500 30px '+F;
+    var line='', maxW=W-200;
+    items.forEach(function(it,i){
+      var piece=it.k+(joiner? ' '+it.n : '');
+      var test=line? line+'  ·  '+piece : piece;
+      if(x.measureText(test).width>maxW && line){ x.fillText(line,96,yy); yy+=44; line=piece; }
+      else line=test;
+    });
+    if(line){ x.fillText(line,96,yy); yy+=44; }
+    yy+=30;
   }
-  block('업무 유형', top('유형',4));
-  block('발주처', top('발주처',4));
+  block('업무 유형', top('유형',5), true);
+  block('발주처', top('발주처',5), true);
+  block('함께한 곳', top('거래처',6), false);
 
   x.fillStyle='#EDEBE5'; x.fillRect(96,H-190,W-192,1);
   drawMark(x, 96, H-160, 30);
-  x.fillStyle='#6F6D69'; x.font='500 25px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='#6F6D69'; x.font='500 25px '+F;
   x.fillText('프리랜서연구소', 140, H-126);
 
-  var fname='워크보드_'+y+(h?'_상반기':'_하반기')+'.png';
+  var fname='월간기록_'+m+'.png';
   if(cv.toBlob){
     cv.toBlob(function(blob){
       if(!blob){ toast('이미지를 만들지 못했어요'); return; }
