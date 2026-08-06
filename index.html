@@ -434,12 +434,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
 /* ===================== 설정 ===================== */
 var CFG = {
   labUrl: 'https://freelancerlab.co.kr',            // byline "프리랜서연구소" → 프리랜서 대상 홈페이지
-  cafeUrl: 'https://cafe.naver.com/freelancerlab',  // 세무·법률 상담 카페
   trialDays: 28,              // ▶ 첫 연결일 기준 체험 일수. 시작일이 달라도 각자 28일. 0으로 두면 잠금 비활성.
   verifyUrl: 'https://script.google.com/macros/s/AKfycbzVVXseo2Ss_UeebIevmm-IDzFFma_DdlC0AwRJp3rgLHnXiT2A8tcsQ6QBycCAFFYP/exec',   // 코드 검증 웹앱 (코드관리 시트)
   fallbackCode: 'FREELANCERLAB-UNLOCK',   // verifyUrl 비었을 때 쓰는 임시 코드
-  surveyUrl: 'https://forms.gle/7cBZsm6kLqzzpDWD9',
-  subscribeUrl: 'https://freelancerlab.co.kr',
+  surveyUrl: 'https://forms.gle/V2UJYYZUfLV2pzM39',   // 잠금 화면 [설문 남기기]
+  subscribeUrl: 'https://freelancerlab.co.kr/',      // 설정 탭 [구독 안내]
   clientTypes: ['기업','지자체·공공','방송·미디어','교육기관','개인·소상공인','기타'],
   campaignTemplates: [
     { 유형:'시즌 인사', 이름:'설 인사', 문구:'[담당자명]님, 권세란입니다.\n풍요로운 설 명절 보내시길 바랍니다. 지난 [거래처명]과의 인연에 깊이 감사드리며, 올 한 해도 좋은 자리에서 함께할 수 있기를 기대합니다.\n새해 복 많이 받으세요.' },
@@ -579,7 +578,8 @@ function setSchedRange(r){
 function dayItems(key){
   var out=[];
   S.bookings.filter(function(b){return dstr(b['날짜'])===key;}).forEach(function(b){
-    out.push({k:'bk', t:(b['행사명']||b['거래처']||'섭외')});
+    var tm=String(b['시작시간']||'').trim();
+    out.push({k:'bk', tm:tm, t:(tm? tm+' ':'')+(b['행사명']||b['거래처']||'섭외')});
   });
   S.content.forEach(function(c){
     var sc=c['일정']||{};
@@ -592,6 +592,7 @@ function dayItems(key){
       if(dval && dstr(dval)===key) out.push({k:'ct', t:'['+n+'] '+(c['제목']||'콘텐츠')});
     });
   });
+  out.sort(function(a,b){ return String(a.tm||'99:99').localeCompare(String(b.tm||'99:99')); });
   return out;
 }
 function renderSchedule(){
@@ -761,7 +762,8 @@ function renderBookings(){
 function bookingCard(b){
   var settled=isSettled(b);
   var dt=dstr(b['날짜']);
-  var dLabel=dt? (Number(dt.slice(5,7))+'월 '+Number(dt.slice(8,10))+'일') : '날짜 없음';
+  var tm=String(b['시작시간']||'').trim();
+  var dLabel=(dt? (Number(dt.slice(5,7))+'월 '+Number(dt.slice(8,10))+'일') : '날짜 없음')+(tm? ' · '+tm : '');
   var tags='';
   if(b['유형'])   tags+='<span class="wb-tag t-type">'+esc(b['유형'])+'</span>';
   if(b['발주처']) tags+='<span class="wb-tag t-cli">'+esc(b['발주처'])+'</span>';
@@ -809,7 +811,8 @@ function buildBookingModal(b, mode){
   modal('섭외 '+(mode==='edit'?'수정':'기록'),
     dlCli+dlMgr+
     '<input type="hidden" id="b_id" value="'+(b.id||'')+'">'+
-    field('날짜','<input id="b_date" type="date" value="'+(dstr(b['날짜'])||today())+'">')+
+    '<div class="fg2">'+field('날짜','<input id="b_date" type="date" value="'+(dstr(b['날짜'])||today())+'">')+
+      field('시작 시간','<input id="b_time" type="time" value="'+esc(b['시작시간']||'')+'">')+'</div>'+
     repeatBlock+
     field('행사명','<input id="b_title" placeholder="예: KT클라우드 신제품 발표회 (주최처 함께 기입)" value="'+esc(b['행사명']||'')+'">')+
     field('거래처 (결제 주체 · 대행 가능)','<input id="b_client" list="dl_cli" onchange="prefillClient()" value="'+esc(b['거래처']||'')+'">')+
@@ -850,7 +853,7 @@ function prefillClient(){
 function saveBooking(mode){
   var settled=document.getElementById('b_settle').checked;
   var status=val('b_status'); if(settled) status='종료';   // 정산 완료 → 자동 종료
-  var base={ '행사명':val('b_title'),'거래처':val('b_client'),'유형':val('b_type'),'발주처':val('b_ctype'),'역할':val('b_role'),'단가':val('b_fee'),'소요시간':val('b_dur'),
+  var base={ '시작시간':val('b_time'),'행사명':val('b_title'),'거래처':val('b_client'),'유형':val('b_type'),'발주처':val('b_ctype'),'역할':val('b_role'),'단가':val('b_fee'),'소요시간':val('b_dur'),
     '상태':status,'담당자':val('b_mgr'),'전화':val('b_tel'),'이메일':val('b_email'),
     '정산':settled,'수입분류':val('b_cat'),'메모':val('b_memo') };
   if(!base['행사명']){ toast('행사명을 입력하세요'); return; }
@@ -1373,11 +1376,29 @@ function exportCard(){
   x.fillStyle='#6F6D69'; x.font='500 25px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif';
   x.fillText('프리랜서연구소', 140, H-126);
 
-  var a=document.createElement('a');
-  a.download='워크보드_'+y+(h?'_상반기':'_하반기')+'.png';
-  a.href=cv.toDataURL('image/png');
-  a.click();
-  toast('이미지로 저장했어요');
+  var fname='워크보드_'+y+(h?'_상반기':'_하반기')+'.png';
+  if(cv.toBlob){
+    cv.toBlob(function(blob){
+      if(!blob){ toast('이미지를 만들지 못했어요'); return; }
+      var file=null;
+      try{ file=new File([blob], fname, {type:'image/png'}); }catch(e){}
+      if(file && navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file]}).then(function(){
+          toast('공유창에서 [이미지 저장]을 누르면 사진에 담겨요');
+        }).catch(function(){});
+        return;
+      }
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a'); a.href=url; a.download=fname;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+      toast('다운로드 폴더에 저장했어요');
+    }, 'image/png');
+  } else {
+    var a2=document.createElement('a');
+    a2.download=fname; a2.href=cv.toDataURL('image/png'); a2.click();
+    toast('이미지로 저장했어요');
+  }
 }
 
 /* ===================== 시작 ===================== */
