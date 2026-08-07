@@ -393,6 +393,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
         <button class="btn ghost sm" onclick="loadAll(true)">새로고침</button>
       </div>
       <div id="diagBox" style="display:none;margin-top:11px;background:var(--paper);border:0.5px solid var(--line);border-radius:9px;padding:11px;font-size:11px;line-height:1.6"></div>
+      <div id="verLine" style="margin-top:10px;font-size:11px;color:#8a877f;line-height:1.7"></div>
     </div>
     <div class="card">
       <div class="card-h">기본 정보</div>
@@ -570,8 +571,23 @@ function catValue(m,cat){ if(BOOKING_CATS.indexOf(cat)>=0)return bookingIncome(m
 function incTotal(m){ return INCOME_CATS.reduce(function(a,c){return a+catValue(m,c);},0); }
 function lastMonths(n){ var out=[],d=new Date(); for(var i=n-1;i>=0;i--){ var x=new Date(d.getFullYear(),d.getMonth()-i,1); out.push(x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)); } return out; }
 
+/* ===================== 버전 확인 ===================== */
+/* 어떤 빌드가 떠 있는지, 시트 쪽 스크립트가 최신인지 한 줄로 보여준다.
+   "고쳤는데 그대로다"의 대부분은 둘 중 하나가 옛 버전인 경우다. */
+var WB_VERSION='v1_7';
+function renderVersion(){
+  var el=document.getElementById('verLine'); if(!el) return;
+  var hasCol = S.bookings.length? S.bookings.some(function(b){ return Object.prototype.hasOwnProperty.call(b,'시작시간'); }) : null;
+  var line='화면 버전 <b>'+WB_VERSION+'</b>';
+  if(hasCol===null) line+=' · 시트 확인 대기 (섭외 기록 없음)';
+  else if(hasCol)   line+=' · 시트 스크립트 <b style="color:#0f5c3f">최신</b>';
+  else              line+=' · 시트 스크립트 <b style="color:#b3261e">교체 필요</b><br>'+
+    'Apps Script를 v5로 바꾸고 <b>repairShift 실행 → 배포 관리 → 수정 → 새 버전</b>을 해주세요.';
+  el.innerHTML=line;
+}
+
 /* ===================== 렌더 ===================== */
-function renderAll(){ renderSchedule(); renderTasks(); renderDash(); renderBookings(); renderClients(); renderCampaigns(); renderContent(); renderIncomeMonths(); renderUnsettled(); }
+function renderAll(){ renderVersion(); renderSchedule(); renderTasks(); renderDash(); renderBookings(); renderClients(); renderCampaigns(); renderContent(); renderIncomeMonths(); renderUnsettled(); }
 var schedRange = lsGet('wb_sched') || '2w';
 var schedSel = '';
 function setSchedRange(r){
@@ -586,7 +602,10 @@ function setSchedRange(r){
 function dayItems(key){
   var out=[];
   S.bookings.filter(function(b){return dstr(b['날짜'])===key;}).forEach(function(b){
+    /* 시간 자리에는 시간처럼 생긴 값만 넣는다. 시트가 어긋나 글자가 들어와도
+       화면이 그걸 '시간'인 양 보여주면 안 된다. */
     var tm=String(b['시작시간']||'').trim();
+    if(!/^\d{1,2}:\d{2}/.test(tm)) tm='';
     out.push({k:'bk', tm:tm, id:b.id, t:(b['행사명']||b['거래처']||'섭외'), sub:(b['거래처']||'')});
   });
   S.content.forEach(function(c){
@@ -784,6 +803,7 @@ function bookingCard(b){
   var settled=isSettled(b);
   var dt=dstr(b['날짜']);
   var tm=String(b['시작시간']||'').trim();
+  if(!/^\d{1,2}:\d{2}/.test(tm)) tm='';
   var dLabel=(dt? (Number(dt.slice(5,7))+'월 '+Number(dt.slice(8,10))+'일') : '날짜 없음')+(tm? ' · '+tm : '');
   var tags='';
   if(b['유형'])   tags+='<span class="wb-tag t-type">'+esc(b['유형'])+'</span>';
@@ -833,7 +853,7 @@ function buildBookingModal(b, mode){
     dlCli+dlMgr+
     '<input type="hidden" id="b_id" value="'+(b.id||'')+'">'+
     '<div class="fg2">'+field('날짜','<input id="b_date" type="date" value="'+(dstr(b['날짜'])||today())+'">')+
-      field('시작 시간','<input id="b_time" type="time" value="'+esc(b['시작시간']||'')+'">')+'</div>'+
+      field('시작 시간','<input id="b_time" type="time" value="'+esc(/^\d{1,2}:\d{2}/.test(String(b['시작시간']||'').trim())?String(b['시작시간']).trim().slice(0,5):'')+'">')+'</div>'+
     repeatBlock+
     field('행사명','<input id="b_title" placeholder="예: KT클라우드 신제품 발표회 (주최처 함께 기입)" value="'+esc(b['행사명']||'')+'">')+
     field('거래처 (결제 주체 · 대행 가능)','<input id="b_client" list="dl_cli" onchange="prefillClient()" value="'+esc(b['거래처']||'')+'">')+
