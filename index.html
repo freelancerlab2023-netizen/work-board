@@ -209,8 +209,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet)}
 .mdot.ct{background:#1D9E75}
 .mdetail{margin-top:9px;background:var(--paper);border-radius:9px;padding:10px 12px}
 .mdetail .md-d{font-size:11px;color:#8a877f;margin-bottom:6px}
-.mdetail .md-i{font-size:12.5px;padding:4px 0;border-bottom:0.5px solid var(--line)}
+.mdetail .md-i{font-size:12.5px;padding:6px 0;border-bottom:0.5px solid var(--line);display:flex;align-items:baseline;gap:9px}
 .mdetail .md-i:last-child{border:none}
+.mdetail .md-i.tap{cursor:pointer}
+.mdetail .md-t{flex:0 0 44px;font-size:12px;font-weight:700;color:var(--violet);font-variant-numeric:tabular-nums}
+.mdetail .md-t.none{font-weight:500;color:#b3b0a9;font-size:11px}
+.mdetail .md-n{flex:1;min-width:0}
+.mdetail .md-s{display:block;font-size:11px;color:#8a877f;margin-top:1px}
 
 /* ===== v1_2 섭외 카드 ===== */
 .wb-card{position:relative;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:13px 15px;margin-bottom:9px;cursor:pointer}
@@ -575,11 +580,14 @@ function setSchedRange(r){
   renderSchedule();
 }
 /* 날짜별 항목 — 섭외 + 콘텐츠 일정 + 파생 발행 */
+/* v1_7 — 시간은 t(제목)에서 분리한다.
+   달력 칸에 시간을 붙이면 글자가 넘쳐 가시성이 떨어지고,
+   반대로 상세에 시간이 없으면 스케줄 관리가 되지 않는다. */
 function dayItems(key){
   var out=[];
   S.bookings.filter(function(b){return dstr(b['날짜'])===key;}).forEach(function(b){
     var tm=String(b['시작시간']||'').trim();
-    out.push({k:'bk', tm:tm, t:(tm? tm+' ':'')+(b['행사명']||b['거래처']||'섭외')});
+    out.push({k:'bk', tm:tm, id:b.id, t:(b['행사명']||b['거래처']||'섭외'), sub:(b['거래처']||'')});
   });
   S.content.forEach(function(c){
     var sc=c['일정']||{};
@@ -644,7 +652,13 @@ function renderDayDetail(){
   var d=new Date(schedSel);
   var lbl=(d.getMonth()+1)+'월 '+d.getDate()+'일';
   el.innerHTML='<div class="mdetail"><div class="md-d">'+lbl+'</div>'+
-    (items.length? items.map(function(x){return '<div class="md-i">'+esc(x.t)+'</div>';}).join('')
+    (items.length? items.map(function(x){
+        var tm=x.tm? '<span class="md-t">'+esc(x.tm)+'</span>' : '<span class="md-t none">시간 미정</span>';
+        var sub=(x.k==='bk'&&x.sub)? '<span class="md-s">'+esc(x.sub)+'</span>' : '';
+        var clickable=(x.k==='bk'&&x.id);
+        return '<div class="md-i'+(clickable?' tap':'')+'"'+(clickable?' onclick="openBooking(\''+x.id+'\')"':'')+'>'+
+               tm+'<span class="md-n">'+esc(x.t)+sub+'</span></div>';
+      }).join('')
                  : '<div class="md-i" style="color:#a3a09a">일정이 없어요</div>')+'</div>';
 }
 function renderStrip(){
@@ -745,11 +759,18 @@ function doneTask(id){ var tk=todayTasks().find(function(x){return x.id===id;});
 function delTask(id){ var t=today(); tasks[t]=todayTasks().filter(function(x){return x.id!==id;}); saveTasks(); renderTasks(); }
 
 /* --- 섭외 --- */
+/* v1_6 — 날짜 내림차순 + 같은 날은 시작시간 오름차순(시간 없는 건은 뒤로).
+   날짜만으로 정렬하면 같은 날 여러 건의 순서가 저장 순서에 따라 뒤죽박죽이 된다. */
+function bkTime(b){ var t=String(b&&b['시작시간']||'').trim(); return /^\d{1,2}:\d{2}/.test(t)? ('0'+t).slice(-5) : '99:99'; }
+function bkCmp(a,b){
+  var c=String(b['날짜']||'').localeCompare(String(a['날짜']||''));
+  return c!==0? c : bkTime(a).localeCompare(bkTime(b));
+}
 function statusTag(s){ var m={'제안':'violet','확정':'green','종료':'gray'}; return '<span class="tag '+(m[s]||'gray')+'">'+esc(s||'-')+'</span>'; }
 function renderBookings(){
   var el=document.getElementById('bookingList');
   if(!S.bookings.length){ el.innerHTML='<div class="empty">아직 기록이 없습니다.<br>첫 섭외를 기록해 보세요.</div>'; return; }
-  var rows=S.bookings.slice().sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');});
+  var rows=S.bookings.slice().sort(bkCmp);
   var qEl=document.getElementById('bk_q'); var q=(qEl&&qEl.value?qEl.value:'').trim().toLowerCase();
   if(q){
     var KS=['행사명','거래처','담당자','유형','역할','메모'];
@@ -779,9 +800,9 @@ function bookingCard(b){
 }
 var extraDates=[];
 function uniqArr(a){ var s={},o=[]; a.forEach(function(x){ if(x&&!s[x]){s[x]=1;o.push(x);} }); return o; }
-function clientList(){ return uniqArr(S.bookings.map(function(b){return b['거래처'];})); }
+function clientList(){ return uniqArr(S.bookings.map(function(b){return clientKey(b['거래처']);})); }
 function mgrList(){ return uniqArr(S.bookings.map(function(b){return b['담당자'];})); }
-function clientInfo(cl){ var bs=S.bookings.filter(function(b){return b['거래처']===cl;}).sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');}); return bs[0]||null; }
+function clientInfo(cl){ var k=clientKey(cl); var bs=S.bookings.filter(function(b){return clientKey(b['거래처'])===k;}).sort(bkCmp); return bs[0]||null; }
 function nextDay(d){ var x=new Date(d||today()); x.setDate(x.getDate()+1); return x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2); }
 
 function openBooking(id){
@@ -878,12 +899,15 @@ function delBooking(id){ if(confirm('이 기록을 삭제할까요?')) write('bo
 
 /* --- 거래처 --- */
 var expandedClients={};
+/* v1_7 — 앞뒤 공백·중간 이중공백 때문에 같은 거래처가 갈라지던 것을 막는다.
+   묶는 키는 정규화하되, 화면에 보이는 이름은 가장 최근 표기를 쓴다. */
+function clientKey(v){ return String(v==null?'':v).replace(/\s+/g,' ').trim(); }
 function clientsAgg(){
   var map={};
-  S.bookings.forEach(function(b){ var cl=b['거래처']||'(거래처 미지정)';
+  S.bookings.forEach(function(b){ var raw=clientKey(b['거래처']); var cl=raw||'(거래처 미지정)';
     var c=map[cl]||{org:cl,count:0,sum:0,last:'',담당자:'',전화:'',이메일:'',events:[]};
     c.count++; c.sum+=Number(b['단가'])||0; c.events.push(b);
-    if((b['날짜']||'')>=c.last){ c.last=b['날짜']||c.last; c['담당자']=b['담당자']||c['담당자']; c['전화']=b['전화']||c['전화']; c['이메일']=b['이메일']||c['이메일']; }
+    if((b['날짜']||'')>=c.last){ c.last=b['날짜']||c.last; if(raw) c.org=raw; c['담당자']=b['담당자']||c['담당자']; c['전화']=b['전화']||c['전화']; c['이메일']=b['이메일']||c['이메일']; }
     map[cl]=c;
   });
   return Object.keys(map).map(function(k){ var c=map[k]; c.events.sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');}); return c; })
@@ -975,10 +999,10 @@ function toggleCampaignSend(id, client, sent){
   if(c){ c['발송기록']=c['발송기록']||{}; if(sent) c['발송기록'][client]=today(); else delete c['발송기록'][client]; }
   write('campaign.send', {id:id, client:client, sent:sent}, null, true);
 }
-function bookingLabel(b){ return esc((b['행사명']||'(행사명)')+(b['거래처']?' · '+b['거래처']:'')+(b['날짜']?' · '+dstr(b['날짜']):'')); }
+function bookingLabel(b){ var t=String(b['시작시간']||'').trim();
+  return esc((b['행사명']||'(행사명)')+(b['거래처']?' · '+b['거래처']:'')+(b['날짜']?' · '+dstr(b['날짜'])+(t?' '+t:''):'')); }
 function contentForBooking(bid){ return S.content.find(function(c){return String(c['섭외id'])===String(bid);}); }
-function untransferred(){ return S.bookings.filter(function(b){ return !contentForBooking(b.id); })
-  .sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');}); }
+function untransferred(){ return S.bookings.filter(function(b){ return !contentForBooking(b.id); }).sort(bkCmp); }
 
 function renderContent(){
   // 채널별 빠른 추가 버튼
@@ -1039,7 +1063,7 @@ function openContent(id, prefill){
   var preType=(id?c['소스유형']:prefill['소스유형'])||'유튜브 영상';
   var srcOpts=srcTypes.map(function(t){return '<option '+(preType===t?'selected':'')+'>'+esc(t)+'</option>';}).join('');
   var isVid = (typeof sched.video==='boolean') ? sched.video : isVideoSrc(preType);
-  var bkOpts='<option value="">자체 제작</option>'+S.bookings.slice().sort(function(a,b){return (b['날짜']||'').localeCompare(a['날짜']||'');})
+  var bkOpts='<option value="">자체 제작</option>'+S.bookings.slice().sort(bkCmp)
     .map(function(b){return '<option value="'+b.id+'" '+(String(curSrc)===String(b.id)?'selected':'')+'>'+bookingLabel(b)+'</option>';}).join('');
   modal('콘텐츠 '+(id?'수정':'추가'),
     '<input type="hidden" id="c_id" value="'+(c.id||'')+'">'+
@@ -1379,7 +1403,7 @@ function exportCard(){
     x.fillStyle='#1C1B19'; x.font='500 30px '+F;
     var line='', maxW=W-200;
     items.forEach(function(it,i){
-      var piece=it.k+(joiner? ' '+it.n : '');
+      var piece=it.k+(joiner? ' '+it.n+'건' : '');
       var test=line? line+'  ·  '+piece : piece;
       if(x.measureText(test).width>maxW && line){ x.fillText(line,96,yy); yy+=44; line=piece; }
       else line=test;
